@@ -372,9 +372,24 @@
 
             const letters = statsData.letters;
             const sortedLetters = Object.keys(letters).sort((a, b) => {
-                // Sort: uppercase first, then lowercase, alphabetically
-                if (a === a.toUpperCase() && b === b.toLowerCase()) return -1;
-                if (a === a.toLowerCase() && b === b.toUpperCase()) return 1;
+                // Special case: "i" should come immediately after "H"
+                if (a === 'i' && b === 'H') return 1;
+                if (a === 'H' && b === 'i') return -1;
+                if (a === 'i') {
+                    // "i" comes after "H", but before any uppercase letter after "H" (J, K, L, etc.)
+                    if (b === 'H') return 1;
+                    if (b < 'H' && b >= 'A') return 1; // "i" comes after letters before H (A-G)
+                    if (b > 'H' && b <= 'Z') return -1; // "i" comes before letters after H (J-Z)
+                    return -1;
+                }
+                if (b === 'i') {
+                    // "i" comes after "H", but before any uppercase letter after "H" (J, K, L, etc.)
+                    if (a === 'H') return -1;
+                    if (a < 'H' && a >= 'A') return -1; // "i" comes after letters before H (A-G)
+                    if (a > 'H' && a <= 'Z') return 1; // "i" comes before letters after H (J-Z)
+                    return 1;
+                }
+                // Normal alphabetical sort for other letters
                 return a.localeCompare(b);
             });
 
@@ -502,9 +517,9 @@
             document.getElementById('statsFileInput').click();
         });
 
-        // Extract category letter from key (e.g., "P1" -> "P")
+        // Extract category letter from key (e.g., "P1" -> "P", "i2" -> "i")
         function getCategory(key) {
-            return key.match(/^([A-Z]+)/)?.[1] || '';
+            return key.match(/^([A-Za-z]+)/)?.[1] || '';
         }
 
         // Extract number from key (e.g., "P10" -> 10)
@@ -532,8 +547,28 @@
                 grouped[category].push(key);
             }
 
-            // Sort categories alphabetically
-            const sortedCategories = Object.keys(grouped).sort();
+            // Sort categories alphabetically, with "i" after "H"
+            const sortedCategories = Object.keys(grouped).sort((a, b) => {
+                // Special case: "i" should come immediately after "H"
+                if (a === 'i' && b === 'H') return 1;
+                if (a === 'H' && b === 'i') return -1;
+                if (a === 'i') {
+                    // "i" comes after "H", but before any uppercase letter after "H" (J, K, L, etc.)
+                    if (b === 'H') return 1;
+                    if (b < 'H' && b >= 'A') return 1; // "i" comes after letters before H (A-G)
+                    if (b > 'H' && b <= 'Z') return -1; // "i" comes before letters after H (J-Z)
+                    return -1;
+                }
+                if (b === 'i') {
+                    // "i" comes after "H", but before any uppercase letter after "H" (J, K, L, etc.)
+                    if (a === 'H') return -1;
+                    if (a < 'H' && a >= 'A') return -1; // "i" comes after letters before H (A-G)
+                    if (a > 'H' && a <= 'Z') return 1; // "i" comes before letters after H (J-Z)
+                    return 1;
+                }
+                // Normal alphabetical sort for other letters
+                return a.localeCompare(b);
+            });
             
             // Sort keys within each category numerically
             for (const category of sortedCategories) {
