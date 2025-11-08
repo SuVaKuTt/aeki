@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Export Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .category-row {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .category-label {
+            font-weight: bold;
+            color: #b0b0b0;
+            margin-right: 10px;
+            min-width: 30px;
+        }
+
+        .key-item {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #e0e0e0;
+            font-size: 14px;
+            width: 60px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .key-item:hover {
+            background-color: #3d3d3d;
+            border-color: #505050;
+        }
+
+        .key-item.empty {
+            background-color: #252525;
+            color: #808080;
+            border-color: #353535;
+        }
+
+        .key-item.empty:hover {
+            background-color: #2d2d2d;
+            color: #909090;
+        }
+
+        .key-item.highlighted {
+            background-color: #8b0000 !important;
+            border-color: #a00000 !important;
+        }
+
+        .key-item.highlighted.empty {
+            background-color: #6b0000 !important;
+            border-color: #800000 !important;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .modal-list {
+            list-style: none;
+        }
+
+        .modal-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #404040;
+            color: #e0e0e0;
+        }
+
+        .modal-list li:last-child {
+            border-bottom: none;
+        }
+
+        .item-id {
+            font-weight: 500;
+        }
+
+        .item-qty {
+            color: #b0b0b0;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IKEA Export Viewer</h1>
+        <div style="margin-bottom: 20px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px;">
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
+            <button id="loadButton" style="padding: 10px 20px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 14px;">Vali JSON fail</button>
+            <input type="text" id="searchInput" placeholder="Otsi ID..." style="padding: 10px 15px; background-color: #2d2d2d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; font-size: 14px; width: 200px;" />
+        </div>
+        <div id="content"></div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader"></div>
+            <ul class="modal-list" id="modalList"></ul>
+        </div>
+    </div>
+
+    <script>
+        let data = {};
+        let currentSearchId = '';
+
+        // Load JSON file using FileReader
+        function loadData(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    let text = e.target.result;
+                    // Remove BOM if present
+                    if (text.charCodeAt(0) === 0xFEFF) {
+                        text = text.slice(1);
+                    }
+                    data = JSON.parse(text);
+                    renderData();
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    const errorMsg = error.message || 'Unknown error';
+                    document.getElementById('content').innerHTML = 
+                        '<p style="color: #ff6b6b;">Error parsing JSON file: ' + errorMsg + '</p>' +
+                        '<p style="color: #ff6b6b; font-size: 12px;">Please check if the file is valid JSON.</p>';
+                }
+            };
+            
+            reader.onerror = function(e) {
+                console.error('FileReader error:', e);
+                document.getElementById('content').innerHTML = '<p style="color: #ff6b6b;">Error reading file.</p>';
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // File input handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                loadData(file);
+            }
+        });
+
+        // Load button click handler
+        document.getElementById('loadButton').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        // Extract category letter from key (e.g., "P1" -> "P")
+        function getCategory(key) {
+            return key.match(/^([A-Z]+)/)?.[1] || '';
+        }
+
+        // Extract number from key (e.g., "P10" -> 10)
+        function getNumber(key) {
+            const match = key.match(/\d+$/);
+            return match ? parseInt(match[0], 10) : 0;
+        }
+
+        // Check if key has any items
+        function hasItems(key) {
+            return Array.isArray(data[key]) && data[key].length > 0;
+        }
+
+        // Group keys by category
+        function groupByCategory() {
+            const grouped = {};
+            
+            for (const key in data) {
+                const category = getCategory(key);
+                if (!category) continue;
+                
+                if (!grouped[category]) {
+                    grouped[category] = [];
+                }
+                grouped[category].push(key);
+            }
+
+            // Sort categories alphabetically
+            const sortedCategories = Object.keys(grouped).sort();
+            
+            // Sort keys within each category numerically
+            for (const category of sortedCategories) {
+                grouped[category].sort((a, b) => {
+                    return getNumber(a) - getNumber(b);
+                });
+            }
+
+            return { grouped, sortedCategories };
+        }
+
+        // Render all data
+        function renderData() {
+            const content = document.getElementById('content');
+            const { grouped, sortedCategories } = groupByCategory();
+            
+            content.innerHTML = '';
+
+            for (const category of sortedCategories) {
+                const keys = grouped[category];
+                
+                // Check if category has at least one non-empty key
+                const hasNonEmpty = keys.some(key => hasItems(key));
+                
+                if (!hasNonEmpty) {
+                    continue; // Skip empty categories
+                }
+
+                const row = document.createElement('div');
+                row.className = 'category-row';
+
+                const label = document.createElement('div');
+                label.className = 'category-label';
+                label.textContent = category;
+                row.appendChild(label);
+
+                for (const key of keys) {
+                    const keyItem = document.createElement('div');
+                    keyItem.className = 'key-item';
+                    
+                    if (!hasItems(key)) {
+                        keyItem.classList.add('empty');
+                    }
+                    
+                    keyItem.textContent = key;
+                    keyItem.addEventListener('click', () => showModal(key));
+                    
+                    // Re-apply highlight if this key should be highlighted
+                    if (currentSearchId) {
+                        const items = data[key] || [];
+                        const hasId = items.some(item => item.id === currentSearchId);
+                        if (hasId) {
+                            keyItem.classList.add('highlighted');
+                        }
+                    }
+                    
+                    row.appendChild(keyItem);
+                }
+
+                content.appendChild(row);
+            }
+        }
+
+        // Show modal with key data
+        function showModal(key) {
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalList = document.getElementById('modalList');
+
+            modalHeader.textContent = key;
+            modalList.innerHTML = '';
+
+            const items = data[key] || [];
+            
+            if (items.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No items';
+                li.style.color = '#808080';
+                modalList.appendChild(li);
+            } else {
+                for (const item of items) {
+                    const li = document.createElement('li');
+                    
+                    const idSpan = document.createElement('span');
+                    idSpan.className = 'item-id';
+                    idSpan.textContent = item.id || 'N/A';
+                    li.appendChild(idSpan);
+
+                    // Show qty only if it exists and is not 0, null, or empty
+                    if (item.qty !== undefined && item.qty !== null && item.qty !== 0 && item.qty !== '') {
+                        const qtySpan = document.createElement('span');
+                        qtySpan.className = 'item-qty';
+                        qtySpan.textContent = `(qty: ${item.qty})`;
+                        li.appendChild(qtySpan);
+                    }
+
+                    modalList.appendChild(li);
+                }
+            }
+
+            modalOverlay.classList.add('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modalOverlay') {
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
+        });
+
+        // Search for ID and highlight keys
+        function searchAndHighlight(searchId) {
+            // Remove all previous highlights
+            const allKeyItems = document.querySelectorAll('.key-item');
+            allKeyItems.forEach(item => {
+                item.classList.remove('highlighted');
+            });
+
+            if (!searchId || searchId.trim() === '') {
+                currentSearchId = '';
+                return;
+            }
+
+            const searchIdTrimmed = searchId.trim();
+            currentSearchId = searchIdTrimmed;
+            const keysToHighlight = [];
+
+            // Search through all keys
+            for (const key in data) {
+                const items = data[key] || [];
+                const hasId = items.some(item => item.id === searchIdTrimmed);
+                
+                if (hasId) {
+                    keysToHighlight.push(key);
+                }
+            }
+
+            // Highlight found keys
+            keysToHighlight.forEach(key => {
+                const keyItems = document.querySelectorAll('.key-item');
+                keyItems.forEach(item => {
+                    if (item.textContent === key) {
+                        item.classList.add('highlighted');
+                    }
+                });
+            });
+        }
+
+        // Search input event listener
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchId = this.value;
+                searchAndHighlight(searchId);
+            }
+        });
+
+        // Clear highlights when input is cleared
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            if (this.value.trim() === '') {
+                currentSearchId = '';
+                const allKeyItems = document.querySelectorAll('.key-item');
+                allKeyItems.forEach(item => {
+                    item.classList.remove('highlighted');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
