@@ -146,6 +146,23 @@
             color: #b0b0b0;
             margin-left: 10px;
         }
+
+        /* Mobile view */
+        @media (max-width: 768px) {
+            .category-label {
+                display: none;
+            }
+
+            .category-row {
+                justify-content: flex-start;
+            }
+
+            .key-item {
+                flex: 0 0 calc((100% - 6 * 10px) / 7);
+                min-width: 0;
+                width: auto;
+            }
+        }
     </style>
 </head>
 <body>
