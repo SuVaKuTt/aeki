@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Export Viewer</title>
+    <title>MyMy Export Viewer</title>
     <style>
         * {
             margin: 0;
@@ -152,8 +152,6 @@
     <div class="container">
         <h1>IKEA Export Viewer</h1>
         <div style="margin-bottom: 20px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px;">
-            <input type="file" id="fileInput" accept=".json" style="display: none;">
-            <button id="loadButton" style="padding: 10px 20px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 14px;">Vali JSON fail</button>
             <input type="text" id="searchInput" placeholder="Otsi ID..." style="padding: 10px 15px; background-color: #2d2d2d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; font-size: 14px; width: 200px;" />
         </div>
         <div id="content"></div>
@@ -170,48 +168,31 @@
         let data = {};
         let currentSearchId = '';
 
-        // Load JSON file using FileReader
-        function loadData(file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    let text = e.target.result;
-                    // Remove BOM if present
-                    if (text.charCodeAt(0) === 0xFEFF) {
-                        text = text.slice(1);
-                    }
-                    data = JSON.parse(text);
-                    renderData();
-                } catch (error) {
-                    console.error('Error parsing JSON:', error);
-                    const errorMsg = error.message || 'Unknown error';
-                    document.getElementById('content').innerHTML = 
-                        '<p style="color: #ff6b6b;">Error parsing JSON file: ' + errorMsg + '</p>' +
-                        '<p style="color: #ff6b6b; font-size: 12px;">Please check if the file is valid JSON.</p>';
+        // Load JSON file automatically from GitHub Pages
+        async function loadData() {
+            try {
+                const response = await fetch('export.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            };
-            
-            reader.onerror = function(e) {
-                console.error('FileReader error:', e);
-                document.getElementById('content').innerHTML = '<p style="color: #ff6b6b;">Error reading file.</p>';
-            };
-            
-            reader.readAsText(file, 'UTF-8');
+                let text = await response.text();
+                // Remove BOM if present
+                if (text.charCodeAt(0) === 0xFEFF) {
+                    text = text.slice(1);
+                }
+                data = JSON.parse(text);
+                renderData();
+            } catch (error) {
+                console.error('Error loading JSON:', error);
+                const errorMsg = error.message || 'Unknown error';
+                document.getElementById('content').innerHTML = 
+                    '<p style="color: #ff6b6b;">Error loading JSON file: ' + errorMsg + '</p>' +
+                    '<p style="color: #ff6b6b; font-size: 12px;">Please check if export.json exists and is accessible.</p>';
+            }
         }
 
-        // File input handler
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                loadData(file);
-            }
-        });
-
-        // Load button click handler
-        document.getElementById('loadButton').addEventListener('click', function() {
-            document.getElementById('fileInput').click();
-        });
+        // Load data automatically when page loads
+        loadData();
 
         // Extract category letter from key (e.g., "P1" -> "P")
         function getCategory(key) {
