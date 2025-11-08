@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyMy Export Viewer</title>
+    <title>StockFinder</title>
     <style>
         * {
             margin: 0;
@@ -167,9 +167,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>IKEA Export Viewer</h1>
-        <div style="margin-bottom: 20px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px;">
+        <h1>StockFinder</h1>
+        <div style="margin-bottom: 20px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
             <input type="text" id="searchInput" placeholder="Otsi ID..." style="padding: 10px 15px; background-color: #2d2d2d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; font-size: 14px; width: 200px;" />
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background-color: #2d2d2d; border: 1px solid #505050; border-radius: 4px;">
+                <span style="color: #b0b0b0; font-size: 14px;">Näidis: 805.481.85</span>
+                <button id="copyExampleBtn" style="padding: 6px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Copy</button>
+            </div>
         </div>
         <div id="content"></div>
     </div>
@@ -408,6 +412,26 @@
                     item.classList.remove('highlighted');
                 });
             }
+        });
+
+        // Copy example ID button
+        document.getElementById('copyExampleBtn').addEventListener('click', function() {
+            const exampleId = '805.481.85';
+            navigator.clipboard.writeText(exampleId).then(function() {
+                // Paste into search input
+                const searchInput = document.getElementById('searchInput');
+                searchInput.value = exampleId;
+                searchInput.focus();
+                // Trigger search
+                searchAndHighlight(exampleId);
+            }).catch(function(err) {
+                console.error('Failed to copy:', err);
+                // Fallback: just set the value
+                const searchInput = document.getElementById('searchInput');
+                searchInput.value = exampleId;
+                searchInput.focus();
+                searchAndHighlight(exampleId);
+            });
         });
     </script>
 </body>
