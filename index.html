@@ -147,6 +147,30 @@
             margin-left: 10px;
         }
 
+        /* Stats table mobile view */
+        @media (max-width: 768px) {
+            .stats-desktop {
+                display: none !important;
+            }
+
+            .stats-mobile {
+                display: table !important;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        /* Desktop view - hide mobile table */
+        @media (min-width: 769px) {
+            .stats-mobile {
+                display: none !important;
+            }
+
+            .stats-desktop {
+                display: table;
+            }
+        }
+
         /* Mobile view */
         @media (max-width: 768px) {
             .category-label {
@@ -355,47 +379,77 @@
             });
 
             // Create table structure
-            let html = '<table style="margin: 0 auto; border-collapse: collapse; width: auto;">';
+            // Desktop: letters on top, stats below
+            // Mobile: letters on left, stats in columns
+            let html = '<table class="stats-table stats-desktop" style="margin: 0 auto; border-collapse: collapse; width: auto;">';
             
-            // Header row with empty first cell and letters
-            html += '<tr>';
+            // Desktop header row with empty first cell and letters
+            html += '<tr class="stats-header-row">';
             html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px; text-align: right; padding-right: 12px;"></th>';
             for (const letter of sortedLetters) {
-                html += `<th style="padding: 4px 6px; font-weight: bold; color: #e0e0e0; font-size: 12px;">${letter}</th>`;
+                html += `<th class="stats-letter-header" style="padding: 4px 6px; font-weight: bold; color: #e0e0e0; font-size: 12px;">${letter}</th>`;
             }
             html += '</tr>';
             
-            // Stats rows
+            // Desktop stats rows
             // Row 1: entries
-            html += '<tr>';
-            html += '<td style="padding: 2px 6px; border-top: 1px solid #404040; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">entries</td>';
+            html += '<tr class="stats-row">';
+            html += '<td class="stats-label" style="padding: 2px 6px; border-top: 1px solid #404040; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">entries</td>';
             for (const letter of sortedLetters) {
                 const stats = letters[letter];
-                html += `<td style="padding: 2px 6px; border-top: 1px solid #404040;">${stats.entries}</td>`;
+                html += `<td class="stats-value" style="padding: 2px 6px; border-top: 1px solid #404040;">${stats.entries}</td>`;
             }
             html += '</tr>';
             
             // Row 2: unique IDs
-            html += '<tr>';
-            html += '<td style="padding: 2px 6px; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">uniqueIds</td>';
+            html += '<tr class="stats-row">';
+            html += '<td class="stats-label" style="padding: 2px 6px; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">uniqueIds</td>';
             for (const letter of sortedLetters) {
                 const stats = letters[letter];
-                html += `<td style="padding: 2px 6px;">${stats.uniqueIds}</td>`;
+                html += `<td class="stats-value" style="padding: 2px 6px;">${stats.uniqueIds}</td>`;
             }
             html += '</tr>';
             
             // Row 3: totalQty
-            html += '<tr>';
-            html += '<td style="padding: 2px 6px; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">totalQty</td>';
+            html += '<tr class="stats-row">';
+            html += '<td class="stats-label" style="padding: 2px 6px; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">totalQty</td>';
             for (const letter of sortedLetters) {
                 const stats = letters[letter];
                 if (stats.totalQty > 0) {
-                    html += `<td style="padding: 2px 6px; color: #b0b0b0;">${stats.totalQty}</td>`;
+                    html += `<td class="stats-value" style="padding: 2px 6px; color: #b0b0b0;">${stats.totalQty}</td>`;
                 } else {
-                    html += '<td style="padding: 2px 6px; color: #606060;">-</td>';
+                    html += '<td class="stats-value" style="padding: 2px 6px; color: #606060;">-</td>';
                 }
             }
             html += '</tr>';
+            
+            html += '</table>';
+            
+            // Mobile table: letters on left, stats in columns
+            html += '<table class="stats-table stats-mobile" style="margin: 0 auto; border-collapse: collapse; width: auto; display: none;">';
+            
+            // Header row with stat labels
+            html += '<tr>';
+            html += '<th style="padding: 4px 6px; font-weight: bold; color: #e0e0e0; font-size: 12px; text-align: left;">Letter</th>';
+            html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px;">entries</th>';
+            html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px;">uniqueIds</th>';
+            html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px;">totalQty</th>';
+            html += '</tr>';
+            
+            // Rows with letters and their stats
+            for (const letter of sortedLetters) {
+                const stats = letters[letter];
+                html += '<tr>';
+                html += `<td style="padding: 4px 6px; font-weight: bold; color: #e0e0e0; font-size: 12px; border-top: 1px solid #404040;">${letter}</td>`;
+                html += `<td style="padding: 4px 6px; border-top: 1px solid #404040;">${stats.entries}</td>`;
+                html += `<td style="padding: 4px 6px; border-top: 1px solid #404040;">${stats.uniqueIds}</td>`;
+                if (stats.totalQty > 0) {
+                    html += `<td style="padding: 4px 6px; border-top: 1px solid #404040; color: #b0b0b0;">${stats.totalQty}</td>`;
+                } else {
+                    html += '<td style="padding: 4px 6px; border-top: 1px solid #404040; color: #606060;">-</td>';
+                }
+                html += '</tr>';
+            }
             
             html += '</table>';
             
