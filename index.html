@@ -48,15 +48,15 @@
 
         .key-item {
             display: inline-block;
-            padding: 8px 16px;
+            padding: 6px 13px;
             background-color: #2d2d2d;
             border: 1px solid #404040;
-            border-radius: 4px;
+            border-radius: 3px;
             cursor: pointer;
             transition: all 0.2s;
             color: #e0e0e0;
             font-size: 14px;
-            width: 60px;
+            width: 48px;
             text-align: center;
             box-sizing: border-box;
         }
@@ -182,8 +182,19 @@
                 <span style="color: #b0b0b0; font-size: 14px;">Example: 805.481.85</span>
                 <button id="copyExampleBtn" style="padding: 6px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Copy</button>
             </div>
+            <input type="file" id="fileInput" accept=".json" style="display: none;" />
+            <button id="openFileBtn" style="display: none; padding: 10px 15px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 14px;">Open local JSON file</button>
         </div>
         <div id="content"></div>
+        
+        <!-- Stats section -->
+        <div id="statsSection" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #404040; display: none;">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <input type="file" id="statsFileInput" accept=".json" style="display: none;" />
+                <button id="openStatsFileBtn" style="display: none; padding: 6px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Open local stats file</button>
+            </div>
+            <div id="statsContent" style="text-align: center; font-size: 11px; color: #b0b0b0;"></div>
+        </div>
     </div>
 
     <div class="modal-overlay" id="modalOverlay">
@@ -197,31 +208,233 @@
         let data = {};
         let currentSearchId = '';
 
+        // Check if running locally (file://) or on GitHub Pages
+        function isLocal() {
+            return window.location.protocol === 'file:' || 
+                   window.location.hostname === '' || 
+                   window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1';
+        }
+
         // Load JSON file automatically from GitHub Pages
         async function loadData() {
-            try {
-                const response = await fetch('export.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            // Only auto-load if on GitHub Pages
+            if (!isLocal()) {
+                try {
+                    const response = await fetch('export.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    let text = await response.text();
+                    // Remove BOM if present
+                    if (text.charCodeAt(0) === 0xFEFF) {
+                        text = text.slice(1);
+                    }
+                    data = JSON.parse(text);
+                    renderData();
+                } catch (error) {
+                    console.error('Error loading JSON:', error);
+                    const errorMsg = error.message || 'Unknown error';
+                    document.getElementById('content').innerHTML = 
+                        '<p style="color: #ff6b6b;">Error loading JSON file: ' + errorMsg + '</p>' +
+                        '<p style="color: #ff6b6b; font-size: 12px;">Please check if export.json exists and is accessible.</p>';
                 }
-                let text = await response.text();
-                // Remove BOM if present
-                if (text.charCodeAt(0) === 0xFEFF) {
-                    text = text.slice(1);
-                }
-                data = JSON.parse(text);
-                renderData();
-            } catch (error) {
-                console.error('Error loading JSON:', error);
-                const errorMsg = error.message || 'Unknown error';
-                document.getElementById('content').innerHTML = 
-                    '<p style="color: #ff6b6b;">Error loading JSON file: ' + errorMsg + '</p>' +
-                    '<p style="color: #ff6b6b; font-size: 12px;">Please check if export.json exists and is accessible.</p>';
             }
         }
 
-        // Load data automatically when page loads
-        loadData();
+        // Load JSON from local file using File API
+        function loadLocalFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let text = e.target.result;
+                    // Remove BOM if present
+                    if (text.charCodeAt(0) === 0xFEFF) {
+                        text = text.slice(1);
+                    }
+                    data = JSON.parse(text);
+                    renderData();
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    document.getElementById('content').innerHTML = 
+                        '<p style="color: #ff6b6b;">Error parsing JSON file: ' + error.message + '</p>';
+                }
+            };
+            reader.onerror = function() {
+                document.getElementById('content').innerHTML = 
+                    '<p style="color: #ff6b6b;">Error reading file.</p>';
+            };
+            reader.readAsText(file);
+        }
+
+        // Load stats file
+        async function loadStats() {
+            // Only auto-load if on GitHub Pages
+            if (!isLocal()) {
+                try {
+                    const response = await fetch('export_stats.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    let text = await response.text();
+                    // Remove BOM if present
+                    if (text.charCodeAt(0) === 0xFEFF) {
+                        text = text.slice(1);
+                    }
+                    const statsData = JSON.parse(text);
+                    renderStats(statsData);
+                } catch (error) {
+                    console.error('Error loading stats JSON:', error);
+                    // Don't show error, just hide stats section
+                    document.getElementById('statsSection').style.display = 'none';
+                }
+            }
+        }
+
+        // Load stats from local file using File API
+        function loadLocalStatsFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let text = e.target.result;
+                    // Remove BOM if present
+                    if (text.charCodeAt(0) === 0xFEFF) {
+                        text = text.slice(1);
+                    }
+                    const statsData = JSON.parse(text);
+                    renderStats(statsData);
+                } catch (error) {
+                    console.error('Error parsing stats JSON:', error);
+                    document.getElementById('statsContent').innerHTML = 
+                        '<p style="color: #ff6b6b;">Error parsing stats JSON file: ' + error.message + '</p>';
+                }
+            };
+            reader.onerror = function() {
+                document.getElementById('statsContent').innerHTML = 
+                    '<p style="color: #ff6b6b;">Error reading stats file.</p>';
+            };
+            reader.readAsText(file);
+        }
+
+        // Render stats table
+        function renderStats(statsData) {
+            const statsContent = document.getElementById('statsContent');
+            const statsSection = document.getElementById('statsSection');
+            const openStatsFileBtn = document.getElementById('openStatsFileBtn');
+            
+            if (!statsData || !statsData.letters) {
+                statsSection.style.display = 'none';
+                return;
+            }
+
+            // Show/hide stats file button based on environment
+            if (isLocal()) {
+                openStatsFileBtn.style.display = 'inline-block';
+            } else {
+                openStatsFileBtn.style.display = 'none';
+            }
+
+            const letters = statsData.letters;
+            const sortedLetters = Object.keys(letters).sort((a, b) => {
+                // Sort: uppercase first, then lowercase, alphabetically
+                if (a === a.toUpperCase() && b === b.toLowerCase()) return -1;
+                if (a === a.toLowerCase() && b === b.toUpperCase()) return 1;
+                return a.localeCompare(b);
+            });
+
+            // Create table structure
+            let html = '<table style="margin: 0 auto; border-collapse: collapse; width: auto;">';
+            
+            // Header row with empty first cell and letters
+            html += '<tr>';
+            html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px; text-align: right; padding-right: 12px;"></th>';
+            for (const letter of sortedLetters) {
+                html += `<th style="padding: 4px 6px; font-weight: bold; color: #e0e0e0; font-size: 12px;">${letter}</th>`;
+            }
+            html += '</tr>';
+            
+            // Stats rows
+            // Row 1: entries
+            html += '<tr>';
+            html += '<td style="padding: 2px 6px; border-top: 1px solid #404040; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">entries</td>';
+            for (const letter of sortedLetters) {
+                const stats = letters[letter];
+                html += `<td style="padding: 2px 6px; border-top: 1px solid #404040;">${stats.entries}</td>`;
+            }
+            html += '</tr>';
+            
+            // Row 2: unique IDs
+            html += '<tr>';
+            html += '<td style="padding: 2px 6px; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">uniqueIds</td>';
+            for (const letter of sortedLetters) {
+                const stats = letters[letter];
+                html += `<td style="padding: 2px 6px;">${stats.uniqueIds}</td>`;
+            }
+            html += '</tr>';
+            
+            // Row 3: totalQty
+            html += '<tr>';
+            html += '<td style="padding: 2px 6px; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">totalQty</td>';
+            for (const letter of sortedLetters) {
+                const stats = letters[letter];
+                if (stats.totalQty > 0) {
+                    html += `<td style="padding: 2px 6px; color: #b0b0b0;">${stats.totalQty}</td>`;
+                } else {
+                    html += '<td style="padding: 2px 6px; color: #606060;">-</td>';
+                }
+            }
+            html += '</tr>';
+            
+            html += '</table>';
+            
+            statsContent.innerHTML = html;
+            statsSection.style.display = 'block';
+        }
+
+        // Initialize UI based on environment
+        function initializeUI() {
+            if (isLocal()) {
+                // Show "Open local file" button for local usage
+                document.getElementById('openFileBtn').style.display = 'block';
+                // Show stats section with button for local usage
+                document.getElementById('statsSection').style.display = 'block';
+                document.getElementById('openStatsFileBtn').style.display = 'inline-block';
+            } else {
+                // Hide button and auto-load for GitHub Pages
+                document.getElementById('openFileBtn').style.display = 'none';
+                loadData();
+                loadStats();
+            }
+        }
+
+        // Initialize on page load
+        initializeUI();
+
+        // File input change handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                loadLocalFile(file);
+            }
+        });
+
+        // Open file button click handler
+        document.getElementById('openFileBtn').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        // Stats file input change handler
+        document.getElementById('statsFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                loadLocalStatsFile(file);
+            }
+        });
+
+        // Open stats file button click handler
+        document.getElementById('openStatsFileBtn').addEventListener('click', function() {
+            document.getElementById('statsFileInput').click();
+        });
 
         // Extract category letter from key (e.g., "P1" -> "P")
         function getCategory(key) {
@@ -290,6 +503,18 @@
                 label.className = 'category-label';
                 label.textContent = category;
                 row.appendChild(label);
+
+                // Find first key number to calculate offset
+                const firstKeyNumber = keys.length > 0 ? getNumber(keys[0]) : 1;
+                const offset = firstKeyNumber - 1;
+
+                // Add empty spaces for offset (visual alignment)
+                for (let i = 0; i < offset; i++) {
+                    const emptyItem = document.createElement('div');
+                    emptyItem.className = 'key-item empty';
+                    emptyItem.style.visibility = 'hidden'; // Invisible but takes up space
+                    row.appendChild(emptyItem);
+                }
 
                 for (const key of keys) {
                     const keyItem = document.createElement('div');

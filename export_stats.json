@@ -1,0 +1,102 @@
+﻿{
+  "sheets": {
+    "AreaABCD": {
+      "columnsProcessed": 22,
+      "items": 261
+    },
+    "AreaEFGHi": {
+      "columnsProcessed": 19,
+      "items": 436
+    },
+    "AreaJKL": {
+      "columnsProcessed": 20,
+      "items": 319
+    },
+    "AreaMNOP": {
+      "columnsProcessed": 16,
+      "items": 372
+    }
+  },
+  "letters": {
+    "A": {
+      "entries": 54,
+      "totalQty": 3877,
+      "uniqueIds": 48
+    },
+    "B": {
+      "entries": 58,
+      "totalQty": 3704,
+      "uniqueIds": 53
+    },
+    "D": {
+      "entries": 87,
+      "totalQty": 975,
+      "uniqueIds": 75
+    },
+    "C": {
+      "entries": 62,
+      "totalQty": 800,
+      "uniqueIds": 52
+    },
+    "i": {
+      "entries": 92,
+      "totalQty": 0,
+      "uniqueIds": 86
+    },
+    "H": {
+      "entries": 63,
+      "totalQty": 0,
+      "uniqueIds": 62
+    },
+    "G": {
+      "entries": 92,
+      "totalQty": 0,
+      "uniqueIds": 83
+    },
+    "F": {
+      "entries": 80,
+      "totalQty": 99,
+      "uniqueIds": 75
+    },
+    "E": {
+      "entries": 109,
+      "totalQty": 273,
+      "uniqueIds": 93
+    },
+    "L": {
+      "entries": 123,
+      "totalQty": 0,
+      "uniqueIds": 114
+    },
+    "K": {
+      "entries": 99,
+      "totalQty": 0,
+      "uniqueIds": 86
+    },
+    "J": {
+      "entries": 97,
+      "totalQty": 0,
+      "uniqueIds": 91
+    },
+    "P": {
+      "entries": 140,
+      "totalQty": 0,
+      "uniqueIds": 129
+    },
+    "O": {
+      "entries": 25,
+      "totalQty": 0,
+      "uniqueIds": 24
+    },
+    "N": {
+      "entries": 95,
+      "totalQty": 0,
+      "uniqueIds": 85
+    },
+    "M": {
+      "entries": 112,
+      "totalQty": 0,
+      "uniqueIds": 101
+    }
+  }
+}
