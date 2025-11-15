@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockFinder</title>
+    <title>StockFinder Map (Alpha)</title>
     <style>
         * {
             margin: 0;
@@ -15,234 +15,365 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background-color: #1a1a1a;
             color: #e0e0e0;
-            padding: 20px;
             min-height: 100vh;
-        }
-
-        
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
             color: #ffffff;
             margin-bottom: 30px;
             text-align: center;
+            padding: 20px 20px 0;
         }
 
-        .category-row {
-            margin-bottom: 20px;
+        .file-container {
+            padding: 10px 20px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .main-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
+            flex: 1;
+            overflow: hidden;
         }
 
-        .category-label {
-            font-weight: bold;
-            color: #b0b0b0;
-            margin-right: 10px;
-            min-width: 30px;
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            background-color: #252525;
+            border-right: 1px solid #404040;
+            padding: 20px 0;
+            overflow-y: auto;
+            flex-shrink: 0;
         }
 
-        .key-item {
-            display: inline-block;
-            padding: 6px 13px;
-            background-color: #2d2d2d;
-            border: 1px solid #404040;
-            border-radius: 3px;
+        .area-item {
+            padding: 12px 20px;
             cursor: pointer;
             transition: all 0.2s;
             color: #e0e0e0;
-            font-size: 14px;
-            width: 48px;
-            text-align: center;
-            box-sizing: border-box;
+            border-left: 3px solid transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .key-item:hover {
-            background-color: #3d3d3d;
-            border-color: #505050;
-        }
-
-        .key-item.empty {
-            background-color: #252525;
-            color: #808080;
-            border-color: #353535;
-        }
-
-        .key-item.empty:hover {
+        .area-item:hover {
             background-color: #2d2d2d;
-            color: #909090;
+            border-left-color: #505050;
         }
 
-        .key-item.highlighted {
-            background-color: #8b0000 !important;
-            border-color: #a00000 !important;
-        }
-
-        .key-item.highlighted.empty {
-            background-color: #6b0000 !important;
-            border-color: #800000 !important;
-        }
-
-        /* Modal styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
+        .area-item.active {
             background-color: #2d2d2d;
-            border: 1px solid #404040;
-            border-radius: 8px;
-            padding: 30px;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            width: 90%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-header {
-            margin-bottom: 20px;
+            border-left-color: #8b0000;
             color: #ffffff;
-            font-size: 20px;
             font-weight: bold;
         }
 
-        .modal-list {
-            list-style: none;
-        }
-
-        .modal-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #404040;
+        /* ColorDesc items - same style as area items */
+        .color-desc-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
             color: #e0e0e0;
+            border-left: 3px solid transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .modal-list li:last-child {
-            border-bottom: none;
+        .color-desc-item:hover {
+            background-color: #2d2d2d;
+            border-left-color: #505050;
         }
 
-        .item-id {
-            font-weight: 500;
+        .color-desc-item.active {
+            background-color: #2d2d2d;
+            border-left-color: #4a9eff;
+            color: #ffffff;
+            font-weight: bold;
         }
 
-        .item-qty {
+        /* Content area with image */
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .map-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .map-image {
+            max-width: 100%;
+            max-height: 100%;
+            height: auto;
+            width: auto;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        /* Draggable and resizable box - for coordinate editing */
+        /* Hidden by default - uncomment or set display: block to show */
+        .area-box {
+            position: absolute;
+            border: 2px solid #8b0000;
+            background-color: rgba(139, 0, 0, 0.2);
+            cursor: move;
+            min-width: 50px;
+            min-height: 50px;
+            display: none; /* Hidden - set to 'block' to show for coordinate editing */
+        }
+
+        /* Area boxes on map - shown based on active areas */
+        .map-area-box {
+            position: absolute;
+            border: 2px solid #4a9eff;
+            background-color: rgba(74, 158, 255, 0.3);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .map-area-box .area-label {
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .area-box:hover {
+            background-color: rgba(139, 0, 0, 0.3);
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #8b0000;
+            border: 1px solid #ffffff;
+            cursor: nwse-resize;
+        }
+
+        .resize-handle.nw {
+            top: -5px;
+            left: -5px;
+            cursor: nwse-resize;
+        }
+
+        .resize-handle.ne {
+            top: -5px;
+            right: -5px;
+            cursor: nesw-resize;
+        }
+
+        .resize-handle.sw {
+            bottom: -5px;
+            left: -5px;
+            cursor: nesw-resize;
+        }
+
+        .resize-handle.se {
+            bottom: -5px;
+            right: -5px;
+            cursor: nwse-resize;
+        }
+
+        .coordinates-display {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            padding: 15px;
+            min-width: 200px;
+            z-index: 1000;
+            display: none; /* Hidden - set to 'block' to show for coordinate editing */
+        }
+
+        .coordinates-display h3 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .coordinates-display p {
             color: #b0b0b0;
-            margin-left: 10px;
+            font-size: 12px;
+            margin: 5px 0;
+            font-family: monospace;
         }
 
-        /* Stats table mobile view */
-        @media (max-width: 768px) {
-            .stats-desktop {
-                display: none !important;
-            }
-
-            .stats-mobile {
-                display: table !important;
-                width: 100%;
-                max-width: 100%;
-            }
+        .coordinates-display button {
+            margin-top: 10px;
+            padding: 6px 12px;
+            background-color: #3d3d3d;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 12px;
+            width: 100%;
         }
 
-        /* Desktop view - hide mobile table */
-        @media (min-width: 769px) {
-            .stats-mobile {
-                display: none !important;
-            }
-
-            .stats-desktop {
-                display: table;
-            }
+        .coordinates-display button:hover {
+            background-color: #4d4d4d;
         }
 
         /* Mobile view */
         @media (max-width: 768px) {
-            .category-label {
-                display: none;
+            .main-container {
+                flex-direction: column;
             }
 
-            .category-row {
-                justify-content: flex-start;
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #404040;
+                padding: 8px 10px;
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                overflow-x: auto;
+                flex-shrink: 0;
             }
 
-            .key-item {
-                flex: 0 0 calc((100% - 6 * 10px) / 7);
+            .sidebar-section {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                flex: 1;
                 min-width: 0;
-                width: auto;
+                overflow-y: auto;
+                max-height: 350px;
             }
 
-            .search-container {
-                flex-wrap: nowrap;
+            .sidebar-section.areas-section {
+                align-items: flex-start;
             }
 
-            #searchInput {
-                width: 130px;
+            .sidebar-section.colordesc-section {
+                align-items: flex-start;
             }
 
-            .modal-content {
-                width: 95%;
-                max-width: none;
-                padding: 20px;
-                margin: 10px;
-            }
-
-            .modal-header {
+            .area-item {
+                padding: 10px 12px;
+                white-space: nowrap;
+                border-left: 3px solid transparent;
+                border-bottom: none;
                 font-size: 18px;
-                margin-bottom: 15px;
+                line-height: 1.2;
+                min-height: 24px;
+                display: flex;
+                align-items: center;
+            }
+
+            .area-item:hover {
+                border-left-color: #505050;
+                border-bottom-color: transparent;
+            }
+
+            .area-item.active {
+                border-left-color: #8b0000;
+                border-bottom-color: transparent;
+            }
+
+            .color-desc-item {
+                padding: 10px 12px;
+                white-space: nowrap;
+                border-left: 3px solid transparent;
+                border-bottom: none;
+                font-size: 18px;
+                line-height: 1.2;
+                min-height: 24px;
+                display: flex;
+                align-items: center;
+            }
+
+            .color-desc-item:hover {
+                border-left-color: #505050;
+                border-bottom-color: transparent;
+            }
+
+            .color-desc-item.active {
+                border-left-color: #4a9eff;
+                border-bottom-color: transparent;
+            }
+
+            .content-area {
+                padding: 10px;
+                flex: 1;
+                overflow: auto;
+            }
+
+            .file-container {
+                display: none !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>StockFinder</h1>
-        <div class="search-container" style="margin-bottom: 20px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <input type="text" id="searchInput" placeholder="Search ID..." style="padding: 10px 15px; background-color: #2d2d2d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; font-size: 14px; width: 200px;" />
-            <div class="example-container" style="display: flex; align-items: center; gap: 8px;">
-                <span style="color: #b0b0b0; font-size: 14px;">Example: 805.481.85</span>
-                <button id="copyExampleBtn" style="padding: 6px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Copy</button>
+    <h1>StockFinder Map (Alpha)</h1>
+    <div class="main-container">
+        <div class="sidebar" id="sidebar">
+            <div class="file-container">
+                <input type="file" id="fileInput" accept=".json" style="display: none;" />
+                <button id="openFileBtn" style="padding: 8px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px; width: 100%; margin-bottom: 8px;">Open export.json</button>
+                <input type="file" id="coordinatesFileInput" accept=".json" style="display: none;" />
+                <button id="openCoordinatesBtn" style="padding: 8px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px; width: 100%;">Open coordinates.json</button>
             </div>
-            <input type="file" id="fileInput" accept=".json" style="display: none;" />
-            <button id="openFileBtn" style="display: none; padding: 10px 15px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 14px;">Open local JSON file</button>
         </div>
-        <div id="content"></div>
-        
-        <!-- Stats section -->
-        <div id="statsSection" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #404040; display: none;">
-            <div style="text-align: center; margin-bottom: 10px;">
-                <input type="file" id="statsFileInput" accept=".json" style="display: none;" />
-                <button id="openStatsFileBtn" style="display: none; padding: 6px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px;">Open local stats file</button>
+        <div class="content-area">
+            <div class="map-container" id="mapContainer">
+                <img src="map_2floor.jpg" alt="Map" class="map-image" id="mapImage" />
+                <div class="area-box" id="areaBox">
+                    <div class="resize-handle nw"></div>
+                    <div class="resize-handle ne"></div>
+                    <div class="resize-handle sw"></div>
+                    <div class="resize-handle se"></div>
+                </div>
             </div>
-            <div id="statsContent" style="text-align: center; font-size: 11px; color: #b0b0b0;"></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content">
-            <div class="modal-header" id="modalHeader"></div>
-            <ul class="modal-list" id="modalList"></ul>
+            <div class="coordinates-display" id="coordinatesDisplay">
+                <h3>Area Box Coordinates</h3>
+                <p>X: <span id="coordX">0</span>px</p>
+                <p>Y: <span id="coordY">0</span>px</p>
+                <p>Width: <span id="coordWidth">0</span>px</p>
+                <p>Height: <span id="coordHeight">0</span>px</p>
+                <p>Relative X: <span id="coordRelX">0</span>%</p>
+                <p>Relative Y: <span id="coordRelY">0</span>%</p>
+                <p>Relative Width: <span id="coordRelWidth">0</span>%</p>
+                <p>Relative Height: <span id="coordRelHeight">0</span>%</p>
+                <button id="copyCoordsBtn">Copy Coordinates</button>
+            </div>
         </div>
     </div>
 
     <script>
         let data = {};
-        let currentSearchId = '';
+        let currentArea = '';
+        let areasList = [];
+        let coordinatesData = {};
+        let areaToCoordinateMap = {}; // Maps Area1 -> ABCD, Area2 -> EFGHi, etc.
+        let uniqueColorDescs = []; // All unique colorDesc values from entire JSON
+        let selectedColorDescs = new Set(); // Selected colorDesc filters
 
         // Check if running locally (file://) or on GitHub Pages
         function isLocal() {
@@ -267,13 +398,14 @@
                         text = text.slice(1);
                     }
                     data = JSON.parse(text);
-                    renderData();
+                    extractAreas();
+                    renderSidebar();
+                    // Auto-select first area if available
+                    if (areasList.length > 0) {
+                        selectArea(areasList[0]);
+                    }
                 } catch (error) {
                     console.error('Error loading JSON:', error);
-                    const errorMsg = error.message || 'Unknown error';
-                    document.getElementById('content').innerHTML = 
-                        '<p style="color: #ff6b6b;">Error loading JSON file: ' + errorMsg + '</p>' +
-                        '<p style="color: #ff6b6b; font-size: 12px;">Please check if export.json exists and is accessible.</p>';
                 }
             }
         }
@@ -289,46 +421,291 @@
                         text = text.slice(1);
                     }
                     data = JSON.parse(text);
-                    renderData();
+                    extractAreas();
+                    renderSidebar();
+                    // Don't auto-load coordinates in local mode - user must click button
+                    // If coordinates are already loaded, update mapping and sidebar
+                    if (Object.keys(coordinatesData).length > 0) {
+                        createAreaCoordinateMapping();
+                        renderSidebar();
+                    }
+                    // Auto-select first area if available
+                    if (areasList.length > 0) {
+                        selectArea(areasList[0]);
+                    }
                 } catch (error) {
                     console.error('Error parsing JSON:', error);
-                    document.getElementById('content').innerHTML = 
-                        '<p style="color: #ff6b6b;">Error parsing JSON file: ' + error.message + '</p>';
+                    alert('Error parsing JSON file: ' + error.message);
                 }
             };
             reader.onerror = function() {
-                document.getElementById('content').innerHTML = 
-                    '<p style="color: #ff6b6b;">Error reading file.</p>';
+                console.error('Error reading file.');
+                alert('Error reading file.');
             };
             reader.readAsText(file);
         }
 
-        // Load stats file
-        async function loadStats() {
-            // Only auto-load if on GitHub Pages
-            if (!isLocal()) {
-                try {
-                    const response = await fetch('export_stats.json');
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+        // Extract unique areas and colorDescs from data
+        function extractAreas() {
+            const areasSet = new Set();
+            const colorDescSet = new Set();
+            
+            for (const key in data) {
+                const area = data[key]?.area;
+                const colorDesc = data[key]?.colorDesc;
+                
+                if (area) {
+                    areasSet.add(area);
+                }
+                
+                if (colorDesc) {
+                    colorDescSet.add(colorDesc);
+                }
+            }
+            
+            areasList = Array.from(areasSet).sort((a, b) => {
+                // Sort areas: Area1, Area2, Area3, etc.
+                const aNum = parseInt(a.match(/\d+$/)?.[0] || '0', 10);
+                const bNum = parseInt(b.match(/\d+$/)?.[0] || '0', 10);
+                return aNum - bNum;
+            });
+            
+            // Sort colorDescs alphabetically
+            uniqueColorDescs = Array.from(colorDescSet).sort();
+            
+            console.log('Areas:', areasList);
+            console.log('Unique colorDescs:', uniqueColorDescs);
+        }
+
+        // Render sidebar with areas and colorDesc items
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            // Keep file-container, remove only area items and colorDesc items
+            const existingItems = sidebar.querySelectorAll('.area-item, .color-desc-item, .sidebar-section');
+            // Store active state before removing
+            const activeAreas = new Set();
+            const activeColorDescs = new Set();
+            existingItems.forEach(item => {
+                if (item.classList.contains('active')) {
+                    if (item.classList.contains('color-desc-item')) {
+                        activeColorDescs.add(item.dataset.colorDesc);
+                    } else if (item.classList.contains('area-item')) {
+                        // Extract area name (without coordinate part if present)
+                        const text = item.textContent;
+                        const areaMatch = text.match(/^(Area\d+)/);
+                        if (areaMatch) {
+                            activeAreas.add(areaMatch[1]);
+                        }
                     }
-                    let text = await response.text();
-                    // Remove BOM if present
-                    if (text.charCodeAt(0) === 0xFEFF) {
-                        text = text.slice(1);
+                }
+                item.remove();
+            });
+
+            // Check if mobile view
+            const isMobile = window.matchMedia('(max-width: 768px)').matches;
+            
+            if (isMobile) {
+                // Mobile view: create two sections side by side
+                const areasSection = document.createElement('div');
+                areasSection.className = 'sidebar-section areas-section';
+                
+                const colordescSection = document.createElement('div');
+                colordescSection.className = 'sidebar-section colordesc-section';
+                
+                // Render areas in left section (all areas, can be longer than colorDesc)
+                for (const area of areasList) {
+                    const areaItem = document.createElement('div');
+                    areaItem.className = 'area-item';
+                    
+                    const coordinateKey = areaToCoordinateMap[area];
+                    if (coordinateKey) {
+                        areaItem.textContent = `${area} (${coordinateKey})`;
+                        areaItem.dataset.areaName = area;
+                    } else {
+                        areaItem.textContent = area;
+                        areaItem.dataset.areaName = area;
                     }
-                    const statsData = JSON.parse(text);
-                    renderStats(statsData);
-                } catch (error) {
-                    console.error('Error loading stats JSON:', error);
-                    // Don't show error, just hide stats section
-                    document.getElementById('statsSection').style.display = 'none';
+                    
+                    if (activeAreas.has(area)) {
+                        areaItem.classList.add('active');
+                    }
+                    
+                    areaItem.addEventListener('click', () => selectArea(area));
+                    areasSection.appendChild(areaItem);
+                }
+                
+                // Render colorDesc items in right section
+                for (const colorDesc of uniqueColorDescs) {
+                    const colorDescItem = document.createElement('div');
+                    colorDescItem.className = 'color-desc-item';
+                    colorDescItem.textContent = colorDesc;
+                    colorDescItem.dataset.colorDesc = colorDesc;
+                    
+                    if (activeColorDescs.has(colorDesc)) {
+                        colorDescItem.classList.add('active');
+                        selectedColorDescs.add(colorDesc);
+                    }
+                    
+                    colorDescItem.addEventListener('click', () => selectColorDesc(colorDesc));
+                    colordescSection.appendChild(colorDescItem);
+                }
+                
+                // Add empty items to align rows if areas count > colorDescs count
+                const areasCount = areasList.length;
+                const colorDescsCount = uniqueColorDescs.length;
+                if (areasCount > colorDescsCount) {
+                    for (let i = colorDescsCount; i < areasCount; i++) {
+                        const emptyItem = document.createElement('div');
+                        emptyItem.className = 'color-desc-item';
+                        emptyItem.style.visibility = 'hidden'; // Invisible but takes up space
+                        emptyItem.style.pointerEvents = 'none'; // Not clickable
+                        colordescSection.appendChild(emptyItem);
+                    }
+                }
+                
+                sidebar.appendChild(areasSection);
+                sidebar.appendChild(colordescSection);
+            } else {
+                // Desktop view: render vertically as before
+                for (const area of areasList) {
+                    const areaItem = document.createElement('div');
+                    areaItem.className = 'area-item';
+                    
+                    const coordinateKey = areaToCoordinateMap[area];
+                    if (coordinateKey) {
+                        areaItem.textContent = `${area} (${coordinateKey})`;
+                        areaItem.dataset.areaName = area;
+                    } else {
+                        areaItem.textContent = area;
+                        areaItem.dataset.areaName = area;
+                    }
+                    
+                    if (activeAreas.has(area)) {
+                        areaItem.classList.add('active');
+                    }
+                    
+                    areaItem.addEventListener('click', () => selectArea(area));
+                    sidebar.appendChild(areaItem);
+                }
+                
+                for (const colorDesc of uniqueColorDescs) {
+                    const colorDescItem = document.createElement('div');
+                    colorDescItem.className = 'color-desc-item';
+                    colorDescItem.textContent = colorDesc;
+                    colorDescItem.dataset.colorDesc = colorDesc;
+                    
+                    if (activeColorDescs.has(colorDesc)) {
+                        colorDescItem.classList.add('active');
+                        selectedColorDescs.add(colorDesc);
+                    }
+                    
+                    colorDescItem.addEventListener('click', () => selectColorDesc(colorDesc));
+                    sidebar.appendChild(colorDescItem);
                 }
             }
         }
 
-        // Load stats from local file using File API
-        function loadLocalStatsFile(file) {
+        // Select/deselect colorDesc (toggle)
+        function selectColorDesc(colorDesc) {
+            // Deactivate all areas when colorDesc is selected
+            const areaItems = document.querySelectorAll('.area-item');
+            areaItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            if (selectedColorDescs.has(colorDesc)) {
+                selectedColorDescs.delete(colorDesc);
+                console.log('Deselected colorDesc:', colorDesc);
+            } else {
+                // Clear other colorDescs and select only this one
+                selectedColorDescs.clear();
+                selectedColorDescs.add(colorDesc);
+                console.log('Selected colorDesc:', colorDesc);
+            }
+            
+            // Update UI for all colorDesc items
+            const colorDescItems = document.querySelectorAll('.color-desc-item');
+            colorDescItems.forEach(item => {
+                if (selectedColorDescs.has(item.dataset.colorDesc)) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Update area boxes based on colorDesc filter
+            updateAreaBoxes();
+        }
+
+        // Select/deselect area (toggle)
+        function selectArea(area) {
+            // Deactivate all colorDescs when area is selected
+            selectedColorDescs.clear();
+            const colorDescItems = document.querySelectorAll('.color-desc-item');
+            colorDescItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const areaItems = document.querySelectorAll('.area-item');
+            // Find by data attribute (original area name) or text content
+            const clickedItem = Array.from(areaItems).find(item => 
+                item.dataset.areaName === area || item.textContent.includes(area)
+            );
+            
+            if (clickedItem) {
+                // Toggle active state
+                if (clickedItem.classList.contains('active')) {
+                    clickedItem.classList.remove('active');
+                    console.log('Deselected area:', area);
+                } else {
+                    clickedItem.classList.add('active');
+                    console.log('Selected area:', area);
+                }
+            }
+            
+            // Update currentArea to last selected area (for potential future use)
+            const activeAreas = Array.from(areaItems)
+                .filter(item => item.classList.contains('active'))
+                .map(item => item.dataset.areaName || item.textContent.split(' ')[0]);
+            
+            if (activeAreas.length > 0) {
+                currentArea = activeAreas[activeAreas.length - 1]; // Last selected
+            } else {
+                currentArea = '';
+            }
+            // Update area boxes on map
+            updateAreaBoxes();
+        }
+
+        // Load coordinates from JSON file
+        async function loadCoordinates() {
+            try {
+                const response = await fetch('coordinates.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                let text = await response.text();
+                // Remove BOM if present
+                if (text.charCodeAt(0) === 0xFEFF) {
+                    text = text.slice(1);
+                }
+                coordinatesData = JSON.parse(text);
+                console.log('Coordinates loaded:', coordinatesData);
+                // Create mapping: Area1 -> first key, Area2 -> second key, etc.
+                createAreaCoordinateMapping();
+                // Update sidebar to show coordinate names
+                renderSidebar();
+                // Wait a bit for image to be ready, then update boxes
+                setTimeout(() => {
+                    updateAreaBoxes();
+                }, 100);
+            } catch (error) {
+                console.error('Error loading coordinates:', error);
+            }
+        }
+
+        // Load coordinates from local file
+        function loadLocalCoordinates(file) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -337,450 +714,552 @@
                     if (text.charCodeAt(0) === 0xFEFF) {
                         text = text.slice(1);
                     }
-                    const statsData = JSON.parse(text);
-                    renderStats(statsData);
+                    coordinatesData = JSON.parse(text);
+                    console.log('Coordinates loaded:', coordinatesData);
+                    // Create mapping: Area1 -> first key, Area2 -> second key, etc.
+                    createAreaCoordinateMapping();
+                    // Update sidebar to show coordinate names
+                    renderSidebar();
+                    // Wait a bit for image to be ready, then update boxes
+                    setTimeout(() => {
+                        updateAreaBoxes();
+                    }, 100);
                 } catch (error) {
-                    console.error('Error parsing stats JSON:', error);
-                    document.getElementById('statsContent').innerHTML = 
-                        '<p style="color: #ff6b6b;">Error parsing stats JSON file: ' + error.message + '</p>';
+                    console.error('Error parsing coordinates JSON:', error);
+                    alert('Error parsing coordinates JSON file: ' + error.message);
                 }
             };
             reader.onerror = function() {
-                document.getElementById('statsContent').innerHTML = 
-                    '<p style="color: #ff6b6b;">Error reading stats file.</p>';
+                console.error('Error reading coordinates file.');
+                alert('Error reading coordinates file.');
             };
             reader.readAsText(file);
         }
 
-        // Render stats table
-        function renderStats(statsData) {
-            const statsContent = document.getElementById('statsContent');
-            const statsSection = document.getElementById('statsSection');
-            const openStatsFileBtn = document.getElementById('openStatsFileBtn');
+        // Create mapping between areas (Area1, Area2, etc.) and coordinate keys (ABCD, EFGHi, etc.)
+        function createAreaCoordinateMapping() {
+            areaToCoordinateMap = {};
+            const coordinateKeys = Object.keys(coordinatesData);
+            console.log('Coordinate keys in order:', coordinateKeys);
             
-            if (!statsData || !statsData.letters) {
-                statsSection.style.display = 'none';
+            // Map each area to corresponding coordinate key by index
+            for (let i = 0; i < areasList.length && i < coordinateKeys.length; i++) {
+                const areaName = areasList[i];
+                const coordinateKey = coordinateKeys[i];
+                areaToCoordinateMap[areaName] = coordinateKey;
+                console.log(`Mapped ${areaName} -> ${coordinateKey}`);
+            }
+        }
+
+        // Update area boxes on map based on active areas
+        function updateAreaBoxes() {
+            console.log('updateAreaBoxes called');
+            console.log('mapImage:', mapImage);
+            console.log('mapContainer:', mapContainer);
+            console.log('coordinatesData:', coordinatesData);
+            console.log('coordinatesData keys:', Object.keys(coordinatesData || {}));
+            console.log('areaToCoordinateMap:', areaToCoordinateMap);
+            
+            if (!mapImage) {
+                console.log('mapImage not found');
                 return;
             }
-
-            // Show/hide stats file button based on environment
-            if (isLocal()) {
-                openStatsFileBtn.style.display = 'inline-block';
+            
+            if (!mapContainer) {
+                console.log('mapContainer not found');
+                return;
+            }
+            
+            if (!coordinatesData || Object.keys(coordinatesData).length === 0) {
+                console.log('coordinatesData is empty or not loaded');
+                return;
+            }
+            
+            // Remove existing area boxes
+            const existingBoxes = mapContainer.querySelectorAll('.map-area-box');
+            console.log(`Removing ${existingBoxes.length} existing boxes`);
+            existingBoxes.forEach(box => box.remove());
+            
+            let areasToShow = [];
+            
+            // Check which mode is active: colorDesc mode or area mode
+            if (selectedColorDescs.size > 0) {
+                // ColorDesc mode: show all areas that have the selected colorDesc
+                console.log('ColorDesc mode active, selected colorDescs:', Array.from(selectedColorDescs));
+                
+                const areasWithColorDesc = new Set();
+                for (const key in data) {
+                    const item = data[key];
+                    if (item?.area && selectedColorDescs.has(item?.colorDesc)) {
+                        areasWithColorDesc.add(item.area);
+                    }
+                }
+                areasToShow = Array.from(areasWithColorDesc).sort((a, b) => {
+                    const aNum = parseInt(a.match(/\d+$/)?.[0] || '0', 10);
+                    const bNum = parseInt(b.match(/\d+$/)?.[0] || '0', 10);
+                    return aNum - bNum;
+                });
+                console.log('Areas with selected colorDesc:', areasToShow);
             } else {
-                openStatsFileBtn.style.display = 'none';
+                // Area mode: show only active areas
+                const areaItems = document.querySelectorAll('.area-item');
+                areasToShow = Array.from(areaItems)
+                    .filter(item => item.classList.contains('active'))
+                    .map(item => item.dataset.areaName || item.textContent.split(' ')[0]);
+                console.log('Area mode active, active areas:', areasToShow);
             }
-
-            const letters = statsData.letters;
-            const sortedLetters = Object.keys(letters).sort((a, b) => {
-                // Special case: "i" should come immediately after "H"
-                if (a === 'i' && b === 'H') return 1;
-                if (a === 'H' && b === 'i') return -1;
-                if (a === 'i') {
-                    // "i" comes after "H", but before any uppercase letter after "H" (J, K, L, etc.)
-                    if (b === 'H') return 1;
-                    if (b < 'H' && b >= 'A') return 1; // "i" comes after letters before H (A-G)
-                    if (b > 'H' && b <= 'Z') return -1; // "i" comes before letters after H (J-Z)
-                    return -1;
+            
+            if (areasToShow.length === 0) {
+                console.log('No areas to show');
+                return;
+            }
+            
+            // Wait for image to load and get its dimensions
+            if (!mapImage.complete) {
+                console.log('Image not loaded yet, waiting...');
+                mapImage.addEventListener('load', updateAreaBoxes);
+                return;
+            }
+            
+            const imgRect = mapImage.getBoundingClientRect();
+            const containerRect = mapContainer.getBoundingClientRect();
+            const imgLeft = imgRect.left - containerRect.left;
+            const imgTop = imgRect.top - containerRect.top;
+            
+            console.log('Image dimensions:', imgRect.width, 'x', imgRect.height);
+            console.log('Image position:', imgLeft, imgTop);
+            
+            // Create boxes for areas to show
+            areasToShow.forEach(areaName => {
+                // Get coordinate key from mapping (Area1 -> ABCD, etc.)
+                const coordinateKey = areaToCoordinateMap[areaName];
+                if (!coordinateKey) {
+                    console.warn(`No coordinate mapping found for area: ${areaName}`);
+                    return;
                 }
-                if (b === 'i') {
-                    // "i" comes after "H", but before any uppercase letter after "H" (J, K, L, etc.)
-                    if (a === 'H') return -1;
-                    if (a < 'H' && a >= 'A') return -1; // "i" comes after letters before H (A-G)
-                    if (a > 'H' && a <= 'Z') return 1; // "i" comes before letters after H (J-Z)
-                    return 1;
+                
+                const coords = coordinatesData[coordinateKey];
+                console.log(`Looking for coordinates for "${areaName}" (key: "${coordinateKey}"):`, coords);
+                
+                if (!coords) {
+                    console.warn(`No coordinates found for coordinate key: ${coordinateKey}`);
+                    console.log('Available coordinate keys:', Object.keys(coordinatesData));
+                    return;
                 }
-                // Normal alphabetical sort for other letters
-                return a.localeCompare(b);
+                
+                // Use relative coordinates to position box
+                const boxLeft = imgLeft + (imgRect.width * coords.relX / 100);
+                const boxTop = imgTop + (imgRect.height * coords.relY / 100);
+                const boxWidth = imgRect.width * coords.relWidth / 100;
+                const boxHeight = imgRect.height * coords.relHeight / 100;
+                
+                console.log(`Creating box for ${areaName}:`, {
+                    left: boxLeft,
+                    top: boxTop,
+                    width: boxWidth,
+                    height: boxHeight
+                });
+                
+                // Create box element
+                const box = document.createElement('div');
+                box.className = 'map-area-box';
+                box.style.left = boxLeft + 'px';
+                box.style.top = boxTop + 'px';
+                box.style.width = boxWidth + 'px';
+                box.style.height = boxHeight + 'px';
+                
+                // Add label (coordinate key with spaces, e.g., "J K L")
+                const label = document.createElement('div');
+                label.className = 'area-label';
+                // Convert coordinate key to spaced format: "JKL" -> "J K L"
+                const spacedKey = coordinateKey.split('').join(' ');
+                label.textContent = spacedKey;
+                box.appendChild(label);
+                
+                mapContainer.appendChild(box);
+                console.log(`Box added for ${areaName} at position:`, {
+                    left: box.style.left,
+                    top: box.style.top,
+                    width: box.style.width,
+                    height: box.style.height
+                });
+                console.log('Box element:', box);
+                console.log('Box parent:', box.parentElement);
             });
-
-            // Create table structure
-            // Desktop: letters on top, stats below
-            // Mobile: letters on left, stats in columns
-            let html = '<table class="stats-table stats-desktop" style="margin: 0 auto; border-collapse: collapse; width: auto;">';
-            
-            // Desktop header row with empty first cell and letters
-            html += '<tr class="stats-header-row">';
-            html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px; text-align: right; padding-right: 12px;"></th>';
-            for (const letter of sortedLetters) {
-                html += `<th class="stats-letter-header" style="padding: 4px 6px; font-weight: bold; color: #e0e0e0; font-size: 12px;">${letter}</th>`;
-            }
-            html += '</tr>';
-            
-            // Desktop stats rows
-            // Row 1: entries
-            html += '<tr class="stats-row">';
-            html += '<td class="stats-label" style="padding: 2px 6px; border-top: 1px solid #404040; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">entries</td>';
-            for (const letter of sortedLetters) {
-                const stats = letters[letter];
-                html += `<td class="stats-value" style="padding: 2px 6px; border-top: 1px solid #404040;">${stats.entries}</td>`;
-            }
-            html += '</tr>';
-            
-            // Row 2: unique IDs
-            html += '<tr class="stats-row">';
-            html += '<td class="stats-label" style="padding: 2px 6px; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">uniqueIds</td>';
-            for (const letter of sortedLetters) {
-                const stats = letters[letter];
-                html += `<td class="stats-value" style="padding: 2px 6px;">${stats.uniqueIds}</td>`;
-            }
-            html += '</tr>';
-            
-            // Row 3: totalQty
-            html += '<tr class="stats-row">';
-            html += '<td class="stats-label" style="padding: 2px 6px; text-align: right; padding-right: 12px; color: #b0b0b0; font-size: 11px;">totalQty</td>';
-            for (const letter of sortedLetters) {
-                const stats = letters[letter];
-                if (stats.totalQty > 0) {
-                    html += `<td class="stats-value" style="padding: 2px 6px; color: #b0b0b0;">${stats.totalQty}</td>`;
-                } else {
-                    html += '<td class="stats-value" style="padding: 2px 6px; color: #606060;">-</td>';
-                }
-            }
-            html += '</tr>';
-            
-            html += '</table>';
-            
-            // Mobile table: letters on left, stats in columns
-            html += '<table class="stats-table stats-mobile" style="margin: 0 auto; border-collapse: collapse; width: auto; display: none;">';
-            
-            // Header row with stat labels
-            html += '<tr>';
-            html += '<th style="padding: 4px 6px; font-weight: bold; color: #e0e0e0; font-size: 12px; text-align: left;">Letter</th>';
-            html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px;">entries</th>';
-            html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px;">uniqueIds</th>';
-            html += '<th style="padding: 4px 6px; font-weight: bold; color: #b0b0b0; font-size: 11px;">totalQty</th>';
-            html += '</tr>';
-            
-            // Rows with letters and their stats
-            for (const letter of sortedLetters) {
-                const stats = letters[letter];
-                html += '<tr>';
-                html += `<td style="padding: 4px 6px; font-weight: bold; color: #e0e0e0; font-size: 12px; border-top: 1px solid #404040;">${letter}</td>`;
-                html += `<td style="padding: 4px 6px; border-top: 1px solid #404040;">${stats.entries}</td>`;
-                html += `<td style="padding: 4px 6px; border-top: 1px solid #404040;">${stats.uniqueIds}</td>`;
-                if (stats.totalQty > 0) {
-                    html += `<td style="padding: 4px 6px; border-top: 1px solid #404040; color: #b0b0b0;">${stats.totalQty}</td>`;
-                } else {
-                    html += '<td style="padding: 4px 6px; border-top: 1px solid #404040; color: #606060;">-</td>';
-                }
-                html += '</tr>';
-            }
-            
-            html += '</table>';
-            
-            statsContent.innerHTML = html;
-            statsSection.style.display = 'block';
         }
 
         // Initialize UI based on environment
         function initializeUI() {
+            // Get map elements
+            mapImage = document.getElementById('mapImage');
+            mapContainer = document.getElementById('mapContainer');
+            
+            if (!mapImage) {
+                console.error('mapImage element not found!');
+                return;
+            }
+            
+            if (!mapContainer) {
+                console.error('mapContainer element not found!');
+                return;
+            }
+            
+            // Add image load handler
+            mapImage.addEventListener('load', function() {
+                console.log('Map image loaded');
+                updateAreaBoxes();
+            });
+            
+            // Add image error handler
+            mapImage.addEventListener('error', function() {
+                console.error('Map image failed to load');
+                alert('Pilt ei laadinud! Kontrolli, kas map_2floor.jpg fail on olemas.');
+            });
+            
+            // If image is already loaded, update boxes
+            if (mapImage.complete) {
+                console.log('Map image already loaded');
+                updateAreaBoxes();
+            }
+            
+            // Always show buttons initially, then adjust based on environment
+            const openFileBtn = document.getElementById('openFileBtn');
+            const openCoordinatesBtn = document.getElementById('openCoordinatesBtn');
+            const fileContainer = document.querySelector('.file-container');
+            
             if (isLocal()) {
-                // Show "Open local file" button for local usage
-                document.getElementById('openFileBtn').style.display = 'block';
-                // Show stats section with button for local usage
-                document.getElementById('statsSection').style.display = 'block';
-                document.getElementById('openStatsFileBtn').style.display = 'inline-block';
+                // Show buttons for local usage
+                if (openFileBtn) openFileBtn.style.display = 'block';
+                if (openCoordinatesBtn) openCoordinatesBtn.style.display = 'block';
+                if (fileContainer) fileContainer.style.display = 'block';
             } else {
-                // Hide button and auto-load for GitHub Pages
-                document.getElementById('openFileBtn').style.display = 'none';
-                loadData();
-                loadStats();
+                // Hide buttons and container for GitHub Pages
+                if (openFileBtn) openFileBtn.style.display = 'none';
+                if (openCoordinatesBtn) openCoordinatesBtn.style.display = 'none';
+                if (fileContainer) fileContainer.style.display = 'none';
+                // Load data first, then coordinates (coordinates need areasList from data)
+                loadData().then(() => {
+                    loadCoordinates();
+                }).catch(error => {
+                    console.error('Error loading data:', error);
+                    // Still try to load coordinates even if data fails
+                    loadCoordinates();
+                });
             }
         }
 
         // Initialize on page load
-        initializeUI();
-
-        // File input change handler
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                loadLocalFile(file);
-            }
-        });
-
-        // Open file button click handler
-        document.getElementById('openFileBtn').addEventListener('click', function() {
-            document.getElementById('fileInput').click();
-        });
-
-        // Stats file input change handler
-        document.getElementById('statsFileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                loadLocalStatsFile(file);
-            }
-        });
-
-        // Open stats file button click handler
-        document.getElementById('openStatsFileBtn').addEventListener('click', function() {
-            document.getElementById('statsFileInput').click();
-        });
-
-        // Extract category letter from key (e.g., "P1" -> "P", "i2" -> "i")
-        function getCategory(key) {
-            return key.match(/^([A-Za-z]+)/)?.[1] || '';
-        }
-
-        // Extract number from key (e.g., "P10" -> 10)
-        function getNumber(key) {
-            const match = key.match(/\d+$/);
-            return match ? parseInt(match[0], 10) : 0;
-        }
-
-        // Check if key has any items
-        function hasItems(key) {
-            return data[key] && Array.isArray(data[key].items) && data[key].items.length > 0;
-        }
-
-        // Group keys by category
-        function groupByCategory() {
-            const grouped = {};
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeUI();
             
-            for (const key in data) {
-                const category = getCategory(key);
-                if (!category) continue;
-                
-                if (!grouped[category]) {
-                    grouped[category] = [];
-                }
-                grouped[category].push(key);
-            }
-
-            // Sort categories: single-letter categories first, then multi-letter categories
-            // Within each group, sort alphabetically with "i" after "H"
-            const sortedCategories = Object.keys(grouped).sort((a, b) => {
-                const aIsSingle = a.length === 1;
-                const bIsSingle = b.length === 1;
-                
-                // Single-letter categories come before multi-letter categories
-                if (aIsSingle && !bIsSingle) return -1;
-                if (!aIsSingle && bIsSingle) return 1;
-                
-                // Within same group (both single or both multi), sort alphabetically
-                // Special case: "i" should come immediately after "H"
-                if (a === 'i' && b === 'H') return 1;
-                if (a === 'H' && b === 'i') return -1;
-                if (a === 'i') {
-                    // "i" comes after "H", but before any uppercase letter after "H" (J, K, L, etc.)
-                    if (b === 'H') return 1;
-                    if (b < 'H' && b >= 'A') return 1; // "i" comes after letters before H (A-G)
-                    if (b > 'H' && b <= 'Z') return -1; // "i" comes before letters after H (J-Z)
-                    return -1;
-                }
-                if (b === 'i') {
-                    // "i" comes after "H", but before any uppercase letter after "H" (J, K, L, etc.)
-                    if (a === 'H') return -1;
-                    if (a < 'H' && a >= 'A') return -1; // "i" comes after letters before H (A-G)
-                    if (a > 'H' && a <= 'Z') return 1; // "i" comes before letters after H (J-Z)
-                    return 1;
-                }
-                // Normal alphabetical sort for other letters
-                return a.localeCompare(b);
-            });
-            
-            // Sort keys within each category numerically
-            for (const category of sortedCategories) {
-                grouped[category].sort((a, b) => {
-                    return getNumber(a) - getNumber(b);
+            // File input change handler
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        loadLocalFile(file);
+                    }
                 });
             }
-
-            return { grouped, sortedCategories };
-        }
-
-        // Render all data
-        function renderData() {
-            const content = document.getElementById('content');
-            const { grouped, sortedCategories } = groupByCategory();
             
-            content.innerHTML = '';
-
-            for (const category of sortedCategories) {
-                const keys = grouped[category];
-                
-                // Check if category has at least one non-empty key
-                const hasNonEmpty = keys.some(key => hasItems(key));
-                
-                if (!hasNonEmpty) {
-                    continue; // Skip empty categories
-                }
-
-                const row = document.createElement('div');
-                row.className = 'category-row';
-
-                const label = document.createElement('div');
-                label.className = 'category-label';
-                label.textContent = category;
-                row.appendChild(label);
-
-                // Find first key number to calculate offset
-                const firstKeyNumber = keys.length > 0 ? getNumber(keys[0]) : 1;
-                const offset = firstKeyNumber - 1;
-
-                // Add empty spaces for offset (visual alignment)
-                // Skip offset on mobile to avoid flexbox issues
-                const isMobile = window.innerWidth <= 768;
-                if (!isMobile) {
-                    for (let i = 0; i < offset; i++) {
-                        const emptyItem = document.createElement('div');
-                        emptyItem.className = 'key-item empty';
-                        emptyItem.style.visibility = 'hidden'; // Invisible but takes up space
-                        row.appendChild(emptyItem);
+            // Open file button click handler
+            const openFileBtn = document.getElementById('openFileBtn');
+            if (openFileBtn) {
+                openFileBtn.addEventListener('click', function() {
+                    const fileInput = document.getElementById('fileInput');
+                    if (fileInput) {
+                        fileInput.click();
                     }
-                }
-
-                for (const key of keys) {
-                    const keyItem = document.createElement('div');
-                    keyItem.className = 'key-item';
-                    
-                    if (!hasItems(key)) {
-                        keyItem.classList.add('empty');
-                    }
-                    
-                    keyItem.textContent = key;
-                    keyItem.addEventListener('click', () => showModal(key));
-                    
-                    // Re-apply highlight if this key should be highlighted
-                    if (currentSearchId) {
-                        const items = (data[key] && data[key].items) || [];
-                        const hasId = items.some(item => item.id === currentSearchId);
-                        if (hasId) {
-                            keyItem.classList.add('highlighted');
-                        }
-                    }
-                    
-                    row.appendChild(keyItem);
-                }
-
-                content.appendChild(row);
+                });
             }
+            
+            // Coordinates file input change handler
+            const coordinatesFileInput = document.getElementById('coordinatesFileInput');
+            if (coordinatesFileInput) {
+                coordinatesFileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        loadLocalCoordinates(file);
+                    }
+                });
+            }
+            
+            // Open coordinates button click handler
+            const openCoordinatesBtn = document.getElementById('openCoordinatesBtn');
+            if (openCoordinatesBtn) {
+                openCoordinatesBtn.addEventListener('click', function() {
+                    const coordinatesFileInput = document.getElementById('coordinatesFileInput');
+                    if (coordinatesFileInput) {
+                        coordinatesFileInput.click();
+                    }
+                });
+            }
+        });
+
+        // Draggable and resizable box functionality
+        let isDragging = false;
+        let isResizing = false;
+        let currentHandle = null;
+        let startX, startY, startLeft, startTop, startWidth, startHeight;
+        let boxElement = null;
+        let mapContainer = null;
+        let mapImage = null;
+
+        function initDraggableBox() {
+            boxElement = document.getElementById('areaBox');
+            mapContainer = document.getElementById('mapContainer');
+            mapImage = document.getElementById('mapImage');
+
+            // Center the box initially
+            centerBox();
+
+            // Make box draggable
+            boxElement.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', stopDrag);
+
+            // Make resize handles work
+            const handles = boxElement.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', (e) => startResize(e, handle));
+            });
+
+            // Update coordinates display
+            updateCoordinates();
         }
 
-        // Show modal with key data
-        function showModal(key) {
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalHeader = document.getElementById('modalHeader');
-            const modalList = document.getElementById('modalList');
-
-            modalHeader.textContent = key;
-            modalList.innerHTML = '';
-
-            const items = (data[key] && data[key].items) || [];
+        function centerBox() {
+            if (!mapImage || !boxElement) return;
             
-            if (items.length === 0) {
-                const li = document.createElement('li');
-                li.textContent = 'No items';
-                li.style.color = '#808080';
-                modalList.appendChild(li);
+            // Wait for image to load
+            if (mapImage.complete) {
+                positionBox();
             } else {
-                for (const item of items) {
-                    const li = document.createElement('li');
-                    
-                    const idSpan = document.createElement('span');
-                    idSpan.className = 'item-id';
-                    idSpan.textContent = item.id || 'N/A';
-                    li.appendChild(idSpan);
-
-                    // Show qty only if it exists and is not 0, null, or empty
-                    if (item.qty !== undefined && item.qty !== null && item.qty !== 0 && item.qty !== '') {
-                        const qtySpan = document.createElement('span');
-                        qtySpan.className = 'item-qty';
-                        qtySpan.textContent = `(qty: ${item.qty})`;
-                        li.appendChild(qtySpan);
-                    }
-
-                    modalList.appendChild(li);
-                }
+                mapImage.addEventListener('load', positionBox);
             }
-
-            modalOverlay.classList.add('active');
         }
 
-        // Close modal when clicking outside
-        document.getElementById('modalOverlay').addEventListener('click', (e) => {
-            if (e.target.id === 'modalOverlay') {
-                document.getElementById('modalOverlay').classList.remove('active');
-            }
-        });
+        function positionBox() {
+            const imgRect = mapImage.getBoundingClientRect();
+            const containerRect = mapContainer.getBoundingClientRect();
+            
+            // Calculate image position relative to container
+            const imgLeft = imgRect.left - containerRect.left;
+            const imgTop = imgRect.top - containerRect.top;
+            
+            // Center box on image (100x100px box)
+            const boxWidth = 100;
+            const boxHeight = 100;
+            const boxLeft = imgLeft + (imgRect.width / 2) - (boxWidth / 2);
+            const boxTop = imgTop + (imgRect.height / 2) - (boxHeight / 2);
+            
+            boxElement.style.left = boxLeft + 'px';
+            boxElement.style.top = boxTop + 'px';
+            boxElement.style.width = boxWidth + 'px';
+            boxElement.style.height = boxHeight + 'px';
+            
+            updateCoordinates();
+        }
 
-        // Search for ID and highlight keys
-        function searchAndHighlight(searchId) {
-            // Remove all previous highlights
-            const allKeyItems = document.querySelectorAll('.key-item');
-            allKeyItems.forEach(item => {
-                item.classList.remove('highlighted');
-            });
+        function startDrag(e) {
+            if (e.target.classList.contains('resize-handle')) return;
+            isDragging = true;
+            const rect = boxElement.getBoundingClientRect();
+            const containerRect = mapContainer.getBoundingClientRect();
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = rect.left - containerRect.left;
+            startTop = rect.top - containerRect.top;
+            e.preventDefault();
+        }
 
-            if (!searchId || searchId.trim() === '') {
-                currentSearchId = '';
-                return;
-            }
-
-            const searchIdTrimmed = searchId.trim();
-            currentSearchId = searchIdTrimmed;
-            const keysToHighlight = [];
-
-            // Search through all keys
-            for (const key in data) {
-                const items = (data[key] && data[key].items) || [];
-                const hasId = items.some(item => item.id === searchIdTrimmed);
+        function onDrag(e) {
+            if (!isDragging && !isResizing) return;
+            
+            const containerRect = mapContainer.getBoundingClientRect();
+            const imgRect = mapImage.getBoundingClientRect();
+            
+            if (isDragging) {
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
                 
-                if (hasId) {
-                    keysToHighlight.push(key);
+                let newLeft = startLeft + deltaX;
+                let newTop = startTop + deltaY;
+                
+                // Constrain to image bounds
+                const imgLeft = imgRect.left - containerRect.left;
+                const imgTop = imgRect.top - containerRect.top;
+                const maxLeft = imgLeft + imgRect.width - boxElement.offsetWidth;
+                const maxTop = imgTop + imgRect.height - boxElement.offsetHeight;
+                
+                newLeft = Math.max(imgLeft, Math.min(newLeft, maxLeft));
+                newTop = Math.max(imgTop, Math.min(newTop, maxTop));
+                
+                boxElement.style.left = newLeft + 'px';
+                boxElement.style.top = newTop + 'px';
+            } else if (isResizing) {
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                let newWidth = startWidth;
+                let newHeight = startHeight;
+                let newLeft = startLeft;
+                let newTop = startTop;
+                
+                const imgRect = mapImage.getBoundingClientRect();
+                const imgLeft = imgRect.left - containerRect.left;
+                const imgTop = imgRect.top - containerRect.top;
+                const maxWidth = imgLeft + imgRect.width - startLeft;
+                const maxHeight = imgTop + imgRect.height - startTop;
+                
+                if (currentHandle.classList.contains('se')) {
+                    newWidth = Math.max(50, Math.min(startWidth + deltaX, maxWidth));
+                    newHeight = Math.max(50, Math.min(startHeight + deltaY, maxHeight));
+                } else if (currentHandle.classList.contains('sw')) {
+                    newWidth = Math.max(50, Math.min(startWidth - deltaX, maxWidth));
+                    newHeight = Math.max(50, Math.min(startHeight + deltaY, maxHeight));
+                    newLeft = startLeft + (startWidth - newWidth);
+                } else if (currentHandle.classList.contains('ne')) {
+                    newWidth = Math.max(50, Math.min(startWidth + deltaX, maxWidth));
+                    newHeight = Math.max(50, Math.min(startHeight - deltaY, maxHeight));
+                    newTop = startTop + (startHeight - newHeight);
+                } else if (currentHandle.classList.contains('nw')) {
+                    newWidth = Math.max(50, Math.min(startWidth - deltaX, maxWidth));
+                    newHeight = Math.max(50, Math.min(startHeight - deltaY, maxHeight));
+                    newLeft = startLeft + (startWidth - newWidth);
+                    newTop = startTop + (startHeight - newHeight);
                 }
+                
+                // Constrain to image bounds
+                if (newLeft < imgLeft) {
+                    newWidth += (imgLeft - newLeft);
+                    newLeft = imgLeft;
+                }
+                if (newTop < imgTop) {
+                    newHeight += (imgTop - newTop);
+                    newTop = imgTop;
+                }
+                
+                boxElement.style.left = newLeft + 'px';
+                boxElement.style.top = newTop + 'px';
+                boxElement.style.width = newWidth + 'px';
+                boxElement.style.height = newHeight + 'px';
             }
-
-            // Highlight found keys
-            keysToHighlight.forEach(key => {
-                const keyItems = document.querySelectorAll('.key-item');
-                keyItems.forEach(item => {
-                    if (item.textContent === key) {
-                        item.classList.add('highlighted');
-                    }
-                });
-            });
+            
+            updateCoordinates();
         }
 
-        // Search input event listener
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const searchId = this.value;
-                searchAndHighlight(searchId);
-            }
-        });
+        function stopDrag() {
+            isDragging = false;
+            isResizing = false;
+            currentHandle = null;
+        }
 
-        // Clear highlights when input is cleared
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            if (this.value.trim() === '') {
-                currentSearchId = '';
-                const allKeyItems = document.querySelectorAll('.key-item');
-                allKeyItems.forEach(item => {
-                    item.classList.remove('highlighted');
-                });
-            }
-        });
+        function startResize(e, handle) {
+            isResizing = true;
+            currentHandle = handle;
+            const rect = boxElement.getBoundingClientRect();
+            const containerRect = mapContainer.getBoundingClientRect();
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = rect.left - containerRect.left;
+            startTop = rect.top - containerRect.top;
+            startWidth = rect.width;
+            startHeight = rect.height;
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
-        // Copy example ID button
-        document.getElementById('copyExampleBtn').addEventListener('click', function() {
-            const exampleId = '805.481.85';
-            navigator.clipboard.writeText(exampleId).then(function() {
-                // Paste into search input
-                const searchInput = document.getElementById('searchInput');
-                searchInput.value = exampleId;
-                searchInput.focus();
-                // Trigger search
-                searchAndHighlight(exampleId);
-            }).catch(function(err) {
+        function updateCoordinates() {
+            if (!boxElement || !mapImage) return;
+            
+            const boxRect = boxElement.getBoundingClientRect();
+            const imgRect = mapImage.getBoundingClientRect();
+            const containerRect = mapContainer.getBoundingClientRect();
+            
+            // Absolute coordinates relative to container
+            const absX = boxRect.left - containerRect.left;
+            const absY = boxRect.top - containerRect.top;
+            const absWidth = boxRect.width;
+            const absHeight = boxRect.height;
+            
+            // Relative coordinates relative to image
+            const imgLeft = imgRect.left - containerRect.left;
+            const imgTop = imgRect.top - containerRect.top;
+            const relX = ((absX - imgLeft) / imgRect.width) * 100;
+            const relY = ((absY - imgTop) / imgRect.height) * 100;
+            const relWidth = (absWidth / imgRect.width) * 100;
+            const relHeight = (absHeight / imgRect.height) * 100;
+            
+            document.getElementById('coordX').textContent = Math.round(absX);
+            document.getElementById('coordY').textContent = Math.round(absY);
+            document.getElementById('coordWidth').textContent = Math.round(absWidth);
+            document.getElementById('coordHeight').textContent = Math.round(absHeight);
+            document.getElementById('coordRelX').textContent = relX.toFixed(2);
+            document.getElementById('coordRelY').textContent = relY.toFixed(2);
+            document.getElementById('coordRelWidth').textContent = relWidth.toFixed(2);
+            document.getElementById('coordRelHeight').textContent = relHeight.toFixed(2);
+        }
+
+        // Copy coordinates button
+        document.getElementById('copyCoordsBtn').addEventListener('click', function() {
+            const coords = {
+                x: document.getElementById('coordX').textContent,
+                y: document.getElementById('coordY').textContent,
+                width: document.getElementById('coordWidth').textContent,
+                height: document.getElementById('coordHeight').textContent,
+                relX: document.getElementById('coordRelX').textContent,
+                relY: document.getElementById('coordRelY').textContent,
+                relWidth: document.getElementById('coordRelWidth').textContent,
+                relHeight: document.getElementById('coordRelHeight').textContent
+            };
+            
+            const coordsText = `X: ${coords.x}px, Y: ${coords.y}px, Width: ${coords.width}px, Height: ${coords.height}px\n` +
+                              `Relative: X: ${coords.relX}%, Y: ${coords.relY}%, Width: ${coords.relWidth}%, Height: ${coords.relHeight}%`;
+            
+            navigator.clipboard.writeText(coordsText).then(() => {
+                this.textContent = 'Copied!';
+                setTimeout(() => {
+                    this.textContent = 'Copy Coordinates';
+                }, 2000);
+            }).catch(err => {
                 console.error('Failed to copy:', err);
-                // Fallback: just set the value
-                const searchInput = document.getElementById('searchInput');
-                searchInput.value = exampleId;
-                searchInput.focus();
-                searchAndHighlight(exampleId);
             });
+        });
+
+        // Handle window resize to adjust box position
+        function handleResize() {
+            if (boxElement && mapImage) {
+                updateCoordinates();
+            }
+            // Update area boxes when window resizes
+            updateAreaBoxes();
+        }
+
+        // Initialize draggable box when page loads
+        window.addEventListener('load', function() {
+            initDraggableBox();
+            // Update area boxes when image loads
+            if (mapImage) {
+                mapImage.addEventListener('load', updateAreaBoxes);
+            }
+        });
+
+        // Handle window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                handleResize();
+                // Re-render sidebar if switching between mobile/desktop view
+                if (areasList.length > 0) {
+                    renderSidebar();
+                }
+            }, 100);
         });
     </script>
 </body>
 </html>
+
 

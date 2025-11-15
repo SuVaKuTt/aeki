@@ -4,15 +4,21 @@ Simple web application for viewing and searching categorized export data.
 
 ## Files
 
-- **index.html** - Standalone HTML viewer application with embedded CSS and JavaScript
+- **index.html** - StockFinder Map - interactive map view with area visualization (see details below) - **Homepage**
+- **index1.html** - Standalone HTML viewer application with embedded CSS and JavaScript
 - **index2.html** - StockFinder by Area - shows items grouped by area with sidebar navigation
-- **index3.html** - StockFinder Map - interactive map view with area visualization (see details below)
 - **export.json** - JSON data file containing categorized items with IDs and quantities
 - **coordinates.json** - JSON file containing area coordinates for map visualization
 
 ## Usage
 
+**For the map view (index.html - homepage):**
 1. Open `index.html` in a web browser
+2. The map view will automatically load on GitHub Pages, or use the file buttons for local development
+3. Select areas from the sidebar to visualize them on the map
+
+**For the standalone viewer (index1.html):**
+1. Open `index1.html` in a web browser
 2. Click "Vali JSON fail" (Select JSON file) to load a JSON file
 3. Browse categories and click on any key (e.g., P1, N2, M3) to view items
 4. Use the search box to find items by ID - matching keys will be highlighted
@@ -36,7 +42,7 @@ Each item has:
 - `id` - Item identifier
 - `qty` - Quantity (optional)
 
-## index3.html - StockFinder Map
+## index.html - StockFinder Map (Homepage)
 
 **Overview:**
 Interactive map view that displays areas as rectangular boxes on a floor plan image. Users can select multiple areas simultaneously to visualize their locations on the map.
