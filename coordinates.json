@@ -1,0 +1,73 @@
+{
+  "ABCD": {
+    "x": 292,
+    "y": 723,
+    "width": 121,
+    "height": 50,
+    "relX": 13.41,
+    "relY": 93.53,
+    "relWidth": 22.53,
+    "relHeight": 6.47
+  },
+  "EFGHi": {
+    "x": 422,
+    "y": 636,
+    "width": 50,
+    "height": 94,
+    "relX": 37.62,
+    "relY": 82.28,
+    "relWidth": 9.31,
+    "relHeight": 12.16
+  },
+  "JKL": {
+    "x": 296,
+    "y": 671,
+    "width": 121,
+    "height": 50,
+    "relX": 14.15,
+    "relY": 86.80,
+    "relWidth": 22.53,
+    "relHeight": 6.47
+  },
+  "MNOP": {
+    "x": 283,
+    "y": 581,
+    "width": 50,
+    "height": 94,
+    "relX": 11.73,
+    "relY": 75.16,
+    "relWidth": 9.31,
+    "relHeight": 12.16
+  },
+  "QRST": {
+    "x": 451,
+    "y": 88,
+    "width": 50,
+    "height": 122,
+    "relX": 43.02,
+    "relY": 11.32,
+    "relWidth": 9.31,
+    "relHeight": 15.78
+  },
+  "UVWXYZ": {
+    "x": 290,
+    "y": 201,
+    "width": 118,
+    "height": 50,
+    "relX": 13.04,
+    "relY": 25.94,
+    "relWidth": 21.97,
+    "relHeight": 6.47
+  },
+  "AA.AB.AC.AD": {
+    "x": 514,
+    "y": 467,
+    "width": 137,
+    "height": 50,
+    "relX": 54.75,
+    "relY": 60.41,
+    "relWidth": 25.51,
+    "relHeight": 6.47
+  }
+}
+

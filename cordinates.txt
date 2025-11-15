@@ -1,0 +1,31 @@
+ABCD:
+X: 292px, Y: 723px, Width: 121px, Height: 50px
+Relative: X: 13.41%, Y: 93.53%, Width: 22.53%, Height: 6.47%
+
+EFGHi:
+X: 422px, Y: 636px, Width: 50px, Height: 94px
+Relative: X: 37.62%, Y: 82.28%, Width: 9.31%, Height: 12.16%
+
+JKL:
+X: 296px, Y: 671px, Width: 121px, Height: 50px
+Relative: X: 14.15%, Y: 86.80%, Width: 22.53%, Height: 6.47%
+
+MNOP:
+X: 283px, Y: 581px, Width: 50px, Height: 94px
+Relative: X: 11.73%, Y: 75.16%, Width: 9.31%, Height: 12.16%
+
+QRST:
+X: 451px, Y: 88px, Width: 50px, Height: 122px
+Relative: X: 43.02%, Y: 11.32%, Width: 9.31%, Height: 15.78%
+
+UVWXYZ:
+X: 290px, Y: 201px, Width: 118px, Height: 50px
+Relative: X: 13.04%, Y: 25.94%, Width: 21.97%, Height: 6.47%
+
+AA.AB.AC.AD:
+X: 514px, Y: 467px, Width: 137px, Height: 50px
+Relative: X: 54.75%, Y: 60.41%, Width: 25.51%, Height: 6.47%
+
+
+
+
