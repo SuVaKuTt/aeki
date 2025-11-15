@@ -619,11 +619,15 @@
                 const offset = firstKeyNumber - 1;
 
                 // Add empty spaces for offset (visual alignment)
-                for (let i = 0; i < offset; i++) {
-                    const emptyItem = document.createElement('div');
-                    emptyItem.className = 'key-item empty';
-                    emptyItem.style.visibility = 'hidden'; // Invisible but takes up space
-                    row.appendChild(emptyItem);
+                // Skip offset on mobile to avoid flexbox issues
+                const isMobile = window.innerWidth <= 768;
+                if (!isMobile) {
+                    for (let i = 0; i < offset; i++) {
+                        const emptyItem = document.createElement('div');
+                        emptyItem.className = 'key-item empty';
+                        emptyItem.style.visibility = 'hidden'; // Invisible but takes up space
+                        row.appendChild(emptyItem);
+                    }
                 }
 
                 for (const key of keys) {
