@@ -263,7 +263,7 @@
                 flex: 1;
                 min-width: 0;
                 overflow-y: auto;
-                max-height: 120px;
+                max-height: 350px;
             }
 
             .sidebar-section.areas-section {
@@ -275,13 +275,13 @@
             }
 
             .area-item {
-                padding: 8px 12px;
+                padding: 10px 12px;
                 white-space: nowrap;
                 border-left: 3px solid transparent;
                 border-bottom: none;
-                font-size: 13px;
-                line-height: 1;
-                min-height: 16px;
+                font-size: 18px;
+                line-height: 1.2;
+                min-height: 24px;
                 display: flex;
                 align-items: center;
             }
@@ -297,13 +297,13 @@
             }
 
             .color-desc-item {
-                padding: 8px 12px;
+                padding: 10px 12px;
                 white-space: nowrap;
                 border-left: 3px solid transparent;
                 border-bottom: none;
-                font-size: 13px;
-                line-height: 1;
-                min-height: 16px;
+                font-size: 18px;
+                line-height: 1.2;
+                min-height: 24px;
                 display: flex;
                 align-items: center;
             }
@@ -548,6 +548,19 @@
                     
                     colorDescItem.addEventListener('click', () => selectColorDesc(colorDesc));
                     colordescSection.appendChild(colorDescItem);
+                }
+                
+                // Add empty items to align rows if areas count > colorDescs count
+                const areasCount = areasList.length;
+                const colorDescsCount = uniqueColorDescs.length;
+                if (areasCount > colorDescsCount) {
+                    for (let i = colorDescsCount; i < areasCount; i++) {
+                        const emptyItem = document.createElement('div');
+                        emptyItem.className = 'color-desc-item';
+                        emptyItem.style.visibility = 'hidden'; // Invisible but takes up space
+                        emptyItem.style.pointerEvents = 'none'; // Not clickable
+                        colordescSection.appendChild(emptyItem);
+                    }
                 }
                 
                 sidebar.appendChild(areasSection);
