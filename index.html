@@ -530,7 +530,7 @@
 
         // Check if key has any items
         function hasItems(key) {
-            return Array.isArray(data[key]) && data[key].length > 0;
+            return data[key] && Array.isArray(data[key].items) && data[key].items.length > 0;
         }
 
         // Group keys by category
@@ -547,8 +547,17 @@
                 grouped[category].push(key);
             }
 
-            // Sort categories alphabetically, with "i" after "H"
+            // Sort categories: single-letter categories first, then multi-letter categories
+            // Within each group, sort alphabetically with "i" after "H"
             const sortedCategories = Object.keys(grouped).sort((a, b) => {
+                const aIsSingle = a.length === 1;
+                const bIsSingle = b.length === 1;
+                
+                // Single-letter categories come before multi-letter categories
+                if (aIsSingle && !bIsSingle) return -1;
+                if (!aIsSingle && bIsSingle) return 1;
+                
+                // Within same group (both single or both multi), sort alphabetically
                 // Special case: "i" should come immediately after "H"
                 if (a === 'i' && b === 'H') return 1;
                 if (a === 'H' && b === 'i') return -1;
@@ -630,7 +639,7 @@
                     
                     // Re-apply highlight if this key should be highlighted
                     if (currentSearchId) {
-                        const items = data[key] || [];
+                        const items = (data[key] && data[key].items) || [];
                         const hasId = items.some(item => item.id === currentSearchId);
                         if (hasId) {
                             keyItem.classList.add('highlighted');
@@ -653,7 +662,7 @@
             modalHeader.textContent = key;
             modalList.innerHTML = '';
 
-            const items = data[key] || [];
+            const items = (data[key] && data[key].items) || [];
             
             if (items.length === 0) {
                 const li = document.createElement('li');
@@ -710,7 +719,7 @@
 
             // Search through all keys
             for (const key in data) {
-                const items = data[key] || [];
+                const items = (data[key] && data[key].items) || [];
                 const hasId = items.some(item => item.id === searchIdTrimmed);
                 
                 if (hasId) {

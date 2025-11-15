@@ -1,27 +1,39 @@
 ﻿{
   "sheets": {
-    "AreaABCD": {
+    "ABCD": {
       "columnsProcessed": 22,
       "items": 261
     },
-    "AreaEFGHi": {
+    "EFGHi": {
       "columnsProcessed": 19,
       "items": 436
     },
-    "AreaJKL": {
+    "JKL": {
       "columnsProcessed": 20,
-      "items": 319
+      "items": 360
     },
-    "AreaMNOP": {
+    "MNOP": {
+      "columnsProcessed": 17,
+      "items": 489
+    },
+    "QRST": {
+      "columnsProcessed": 35,
+      "items": 489
+    },
+    "UVWXYZ": {
       "columnsProcessed": 16,
-      "items": 372
+      "items": 651
+    },
+    "AA.AB.AC.AD": {
+      "columnsProcessed": 23,
+      "items": 329
     }
   },
   "letters": {
     "A": {
-      "entries": 54,
+      "entries": 383,
       "totalQty": 3877,
-      "uniqueIds": 48
+      "uniqueIds": 297
     },
     "B": {
       "entries": 58,
@@ -69,9 +81,9 @@
       "uniqueIds": 114
     },
     "K": {
-      "entries": 99,
+      "entries": 140,
       "totalQty": 0,
-      "uniqueIds": 86
+      "uniqueIds": 120
     },
     "J": {
       "entries": 97,
@@ -79,14 +91,14 @@
       "uniqueIds": 91
     },
     "P": {
-      "entries": 140,
+      "entries": 156,
       "totalQty": 0,
-      "uniqueIds": 129
+      "uniqueIds": 144
     },
     "O": {
-      "entries": 25,
+      "entries": 126,
       "totalQty": 0,
-      "uniqueIds": 24
+      "uniqueIds": 119
     },
     "N": {
       "entries": 95,
@@ -97,6 +109,56 @@
       "entries": 112,
       "totalQty": 0,
       "uniqueIds": 101
+    },
+    "Q": {
+      "entries": 105,
+      "totalQty": 0,
+      "uniqueIds": 95
+    },
+    "R": {
+      "entries": 108,
+      "totalQty": 0,
+      "uniqueIds": 102
+    },
+    "S": {
+      "entries": 151,
+      "totalQty": 0,
+      "uniqueIds": 143
+    },
+    "T": {
+      "entries": 125,
+      "totalQty": 0,
+      "uniqueIds": 114
+    },
+    "U": {
+      "entries": 119,
+      "totalQty": 0,
+      "uniqueIds": 111
+    },
+    "V": {
+      "entries": 110,
+      "totalQty": 0,
+      "uniqueIds": 102
+    },
+    "W": {
+      "entries": 60,
+      "totalQty": 0,
+      "uniqueIds": 54
+    },
+    "X": {
+      "entries": 160,
+      "totalQty": 0,
+      "uniqueIds": 150
+    },
+    "Y": {
+      "entries": 125,
+      "totalQty": 0,
+      "uniqueIds": 115
+    },
+    "Z": {
+      "entries": 77,
+      "totalQty": 0,
+      "uniqueIds": 73
     }
   }
 }
