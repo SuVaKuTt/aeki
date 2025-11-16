@@ -48,11 +48,23 @@ Each item has:
 Interactive map view that displays areas as rectangular boxes on a floor plan image. Users can select multiple areas simultaneously to visualize their locations on the map.
 
 **Features:**
+- Sidebar with two sections:
+  - **Section 1: Areas** - Lists all available areas (Area1, Area2, Area3, etc.) with coordinate keys
+  - **Section 2: ColorDesc** - Lists all unique color descriptions for filtering
 - Area selection with multi-select capability (toggle on/off)
+- ColorDesc filtering - select a colorDesc to show all areas containing items with that color description
 - Visual representation of areas as rectangular boxes on the map
 - Area boxes positioned using coordinates from `coordinates.json`
 - Automatic mapping between area names (Area1-7) and coordinate keys (ABCD, EFGHi, etc.)
 - Sidebar displays area names with coordinate keys: "Area1 (ABCD)" format
+- **Info Area** - Right-side panel showing detailed information about active areas:
+  - Displays key ranges in format "A1-23", "B4-19", "C5-17" (first number - count)
+  - Handles continuous ranges and gaps (e.g., "C5-14" and "C16-17" shown separately)
+  - Supports single-letter keys (A1, B2) and multi-letter keys (AB1, AC22)
+  - Shows total count of keys per area
+  - In Area mode: displays all keys for selected areas, plus colorDesc summary at the end
+  - In ColorDesc mode: filters keys by selected colorDesc, shows only matching keys
+  - Header updates dynamically: "Area Info" (Area mode) or "Area Info, Lighting" (ColorDesc mode)
 - Responsive design - boxes scale with image resize
 - Support for area labels (text display in boxes)
 - Wide sidebar (250px) to prevent text wrapping
@@ -72,13 +84,28 @@ Interactive map view that displays areas as rectangular boxes on a floor plan im
 - Both files need to be loaded for full functionality
 
 **Usage:**
-1. Load `export.json` to populate the area list in the sidebar (shows: Area1, Area2, Area3, etc.)
+1. Load `export.json` to populate both sections in the sidebar:
+   - **Section 1 (Areas)**: Shows Area1, Area2, Area3, etc.
+   - **Section 2 (ColorDesc)**: Shows all unique color descriptions from the data
 2. Load `coordinates.json` to enable area box visualization on the map
    - After loading, sidebar area names update to show coordinate keys: "Area1 (ABCD)", "Area2 (EFGHi)", etc.
    - The mapping is automatic: first coordinate key → Area1, second → Area2, etc.
-3. Click area names in the sidebar to toggle their selection (multiple areas can be active)
+3. **Two filtering modes:**
+   - **Area mode**: Click area names in Section 1 to toggle their selection (multiple areas can be active simultaneously)
+   - **ColorDesc mode**: Click a colorDesc in Section 2 to show all areas containing items with that color description (only one colorDesc can be active at a time)
+   - Note: Selecting an area deactivates colorDesc selection, and vice versa
 4. Selected areas appear as rectangular boxes on the map image
 5. Boxes are positioned using relative coordinates (%), so they scale correctly when the image is resized
+6. **Info Area** (right side panel) displays detailed information:
+   - **Area mode**: Shows all keys for selected areas in format "A1-23" (letter + first number - count)
+     - Handles gaps in numbering (e.g., "C5-14" and "C16-17" shown as separate lines)
+     - Supports multi-letter keys (AB1, AC22, etc.)
+     - Shows total count per area: "Area1 (ABCD) (52 pcs)"
+     - Displays colorDesc summary at the end: "Items: Storage, Bathroom, Lighting"
+   - **ColorDesc mode**: Shows only keys matching the selected colorDesc
+     - Header shows selected colorDesc: "Area Info, Lighting"
+     - Filters keys to show only those with matching colorDesc value
+     - Example: If "Storage" is selected, only shows keys where colorDesc = "Storage"
 
 **Coordinate System:**
 - Coordinates are stored in `coordinates.json` with both absolute (px) and relative (%) values

@@ -103,6 +103,7 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
+            gap: 20px;
         }
 
         .map-container {
@@ -121,6 +122,158 @@
             width: auto;
             object-fit: contain;
             border-radius: 4px;
+        }
+
+        /* Info area */
+        .info-area {
+            width: 300px;
+            background-color: #252525;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .info-area h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 1px solid #404040;
+            padding-bottom: 10px;
+        }
+
+        .info-area-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .info-area-section:last-child {
+            border-bottom: none;
+        }
+
+        .info-area-section-title {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .info-area-item {
+            color: #e0e0e0;
+            font-size: 13px;
+            margin: 5px 0;
+            padding-left: 10px;
+            font-family: monospace;
+        }
+
+        /* Search section */
+        .search-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #404040;
+        }
+
+        .search-box-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 13px;
+            font-family: monospace;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .search-button {
+            padding: 8px 16px;
+            background-color: #3d3d3d;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .search-button:hover {
+            background-color: #4d4d4d;
+        }
+
+        .search-example {
+            color: #808080;
+            font-size: 10px;
+            margin-top: 4px;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .search-results {
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .search-result-key {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-family: monospace;
+        }
+
+        .search-result-info {
+            color: #b0b0b0;
+            font-size: 12px;
+            margin: 4px 0;
+        }
+
+        .search-result-info strong {
+            color: #e0e0e0;
+        }
+
+        .search-result-items {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #404040;
+        }
+
+        .search-result-item-id {
+            color: #e0e0e0;
+            font-size: 12px;
+            font-family: monospace;
+            margin: 3px 0;
+            padding-left: 10px;
+        }
+
+        .search-no-results {
+            color: #b0b0b0;
+            font-size: 13px;
+            text-align: center;
+            padding: 20px;
         }
 
         /* Draggable and resizable box - for coordinate editing */
@@ -322,6 +475,13 @@
                 padding: 10px;
                 flex: 1;
                 overflow: auto;
+                flex-direction: column;
+            }
+
+            .info-area {
+                width: 100%;
+                max-height: 300px;
+                margin-top: 10px;
             }
 
             .file-container {
@@ -349,6 +509,18 @@
                     <div class="resize-handle ne"></div>
                     <div class="resize-handle sw"></div>
                     <div class="resize-handle se"></div>
+                </div>
+            </div>
+            <div class="info-area" id="infoArea">
+                <h3>Area Info</h3>
+                <div id="infoContent"></div>
+                <div class="search-section">
+                    <div class="search-box-container">
+                        <input type="text" id="keySearchInput" class="search-input" placeholder="Search key or ID (e.g., A3, 111.222.33)" />
+                        <button id="searchBtn" class="search-button">Search</button>
+                    </div>
+                    <div class="search-example">ex: 805.481.85 or B22 or AC14</div>
+                    <div id="searchResults" class="search-results"></div>
                 </div>
             </div>
             <div class="coordinates-display" id="coordinatesDisplay">
@@ -635,6 +807,8 @@
             
             // Update area boxes based on colorDesc filter
             updateAreaBoxes();
+            // Update info area
+            updateInfoArea();
         }
 
         // Select/deselect area (toggle)
@@ -675,6 +849,8 @@
             }
             // Update area boxes on map
             updateAreaBoxes();
+            // Update info area
+            updateInfoArea();
         }
 
         // Load coordinates from JSON file
@@ -698,6 +874,7 @@
                 // Wait a bit for image to be ready, then update boxes
                 setTimeout(() => {
                     updateAreaBoxes();
+                    updateInfoArea();
                 }, 100);
             } catch (error) {
                 console.error('Error loading coordinates:', error);
@@ -723,6 +900,7 @@
                     // Wait a bit for image to be ready, then update boxes
                     setTimeout(() => {
                         updateAreaBoxes();
+                        updateInfoArea();
                     }, 100);
                 } catch (error) {
                     console.error('Error parsing coordinates JSON:', error);
@@ -888,6 +1066,185 @@
             });
         }
 
+        // Update info area with active areas information
+        function updateInfoArea() {
+            const infoContent = document.getElementById('infoContent');
+            const infoArea = document.getElementById('infoArea');
+            if (!infoContent) {
+                console.log('infoContent element not found');
+                return;
+            }
+
+            // Update header based on selected mode
+            if (infoArea) {
+                const header = infoArea.querySelector('h3');
+                if (header) {
+                    if (selectedColorDescs.size > 0) {
+                        // ColorDesc mode: show selected colorDesc in header
+                        const colorDescArray = Array.from(selectedColorDescs);
+                        header.textContent = `Area Info, ${colorDescArray.join(', ')}`;
+                    } else {
+                        // Area mode: show default header
+                        header.textContent = 'Area Info';
+                    }
+                }
+            }
+
+            // Clear existing content
+            infoContent.innerHTML = '';
+
+            // Get active areas (same logic as updateAreaBoxes)
+            let areasToShow = [];
+            
+            if (selectedColorDescs.size > 0) {
+                // ColorDesc mode: show all areas that have the selected colorDesc
+                const areasWithColorDesc = new Set();
+                for (const key in data) {
+                    const item = data[key];
+                    if (item?.area && selectedColorDescs.has(item?.colorDesc)) {
+                        areasWithColorDesc.add(item.area);
+                    }
+                }
+                areasToShow = Array.from(areasWithColorDesc).sort((a, b) => {
+                    const aNum = parseInt(a.match(/\d+$/)?.[0] || '0', 10);
+                    const bNum = parseInt(b.match(/\d+$/)?.[0] || '0', 10);
+                    return aNum - bNum;
+                });
+            } else {
+                // Area mode: show only active areas
+                const areaItems = document.querySelectorAll('.area-item');
+                areasToShow = Array.from(areaItems)
+                    .filter(item => item.classList.contains('active'))
+                    .map(item => item.dataset.areaName || item.textContent.split(' ')[0]);
+            }
+
+            if (areasToShow.length === 0) {
+                return;
+            }
+
+            // Process each area
+            areasToShow.forEach(areaName => {
+                // Get all keys for this area, filtered by colorDesc if selected
+                const areaKeys = [];
+                for (const key in data) {
+                    const item = data[key];
+                    if (item?.area === areaName) {
+                        // If colorDesc is selected, filter by colorDesc
+                        if (selectedColorDescs.size > 0) {
+                            if (selectedColorDescs.has(item?.colorDesc)) {
+                                areaKeys.push(key);
+                            }
+                        } else {
+                            // No colorDesc filter, include all keys
+                            areaKeys.push(key);
+                        }
+                    }
+                }
+
+                // Group by letter prefix and find continuous ranges
+                // Keys can be "A1", "AB1", "AC22", etc.
+                const letterRanges = {};
+                areaKeys.forEach(key => {
+                    // Extract letters and number from key using regex
+                    // Match: letters at start, then numbers
+                    const match = key.match(/^([A-Z]+)(\d+)$/);
+                    if (!match) {
+                        console.warn(`Invalid key format: ${key}`);
+                        return;
+                    }
+                    
+                    const letterPrefix = match[1]; // "A", "AB", "AC", etc.
+                    const number = parseInt(match[2], 10); // 1, 22, etc.
+                    
+                    if (!letterRanges[letterPrefix]) {
+                        letterRanges[letterPrefix] = [];
+                    }
+                    letterRanges[letterPrefix].push(number);
+                });
+
+                // Find continuous ranges for each letter
+                const letterInfo = {};
+                Object.keys(letterRanges).forEach(letter => {
+                    const numbers = letterRanges[letter].sort((a, b) => a - b);
+                    const ranges = [];
+                    let rangeStart = numbers[0];
+                    let rangeEnd = numbers[0];
+                    
+                    for (let i = 1; i < numbers.length; i++) {
+                        if (numbers[i] === rangeEnd + 1) {
+                            // Continuous, extend range
+                            rangeEnd = numbers[i];
+                        } else {
+                            // Gap found, save current range and start new one
+                            ranges.push({ start: rangeStart, end: rangeEnd, count: rangeEnd - rangeStart + 1 });
+                            rangeStart = numbers[i];
+                            rangeEnd = numbers[i];
+                        }
+                    }
+                    // Don't forget the last range
+                    ranges.push({ start: rangeStart, end: rangeEnd, count: rangeEnd - rangeStart + 1 });
+                    
+                    letterInfo[letter] = ranges;
+                });
+
+                // Calculate total
+                const total = Object.values(letterInfo).reduce((sum, ranges) => {
+                    return sum + ranges.reduce((rangeSum, range) => rangeSum + range.count, 0);
+                }, 0);
+
+                // Get coordinate key for display
+                const coordinateKey = areaToCoordinateMap[areaName] || '';
+                const coordinateDisplay = coordinateKey ? ` (${coordinateKey})` : '';
+
+                // Create section
+                const section = document.createElement('div');
+                section.className = 'info-area-section';
+
+                // Create title
+                const title = document.createElement('div');
+                title.className = 'info-area-section-title';
+                title.textContent = `${areaName}${coordinateDisplay} (${total} pcs)`;
+                section.appendChild(title);
+
+                // Create items for each letter (sorted alphabetically)
+                const sortedLetters = Object.keys(letterInfo).sort();
+                sortedLetters.forEach(letter => {
+                    const ranges = letterInfo[letter];
+                    ranges.forEach(range => {
+                        const item = document.createElement('div');
+                        item.className = 'info-area-item';
+                        // Format: C5-14 (first number to last number in continuous range)
+                        item.textContent = `${letter}${range.start}-${range.count}`;
+                        section.appendChild(item);
+                    });
+                });
+
+                // Add colorDesc info at the end (only in Area mode, not colorDesc mode)
+                if (selectedColorDescs.size === 0) {
+                    // Get unique colorDesc values for this area
+                    const colorDescsSet = new Set();
+                    for (const key in data) {
+                        const item = data[key];
+                        if (item?.area === areaName && item?.colorDesc) {
+                            colorDescsSet.add(item.colorDesc);
+                        }
+                    }
+                    
+                    if (colorDescsSet.size > 0) {
+                        const colorDescsArray = Array.from(colorDescsSet).sort();
+                        const colorDescItem = document.createElement('div');
+                        colorDescItem.className = 'info-area-item';
+                        colorDescItem.style.marginTop = '10px';
+                        colorDescItem.style.fontStyle = 'italic';
+                        colorDescItem.textContent = `Items: ${colorDescsArray.join(', ')}`;
+                        section.appendChild(colorDescItem);
+                    }
+                }
+
+                infoContent.appendChild(section);
+            });
+        }
+
         // Initialize UI based on environment
         function initializeUI() {
             // Get map elements
@@ -908,6 +1265,7 @@
             mapImage.addEventListener('load', function() {
                 console.log('Map image loaded');
                 updateAreaBoxes();
+                updateInfoArea();
             });
             
             // Add image error handler
@@ -920,6 +1278,7 @@
             if (mapImage.complete) {
                 console.log('Map image already loaded');
                 updateAreaBoxes();
+                updateInfoArea();
             }
             
             // Always show buttons initially, then adjust based on environment
@@ -992,6 +1351,160 @@
                     const coordinatesFileInput = document.getElementById('coordinatesFileInput');
                     if (coordinatesFileInput) {
                         coordinatesFileInput.click();
+                    }
+                });
+            }
+
+            // Search functionality
+            const keySearchInput = document.getElementById('keySearchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const searchResults = document.getElementById('searchResults');
+
+            function performSearch() {
+                const searchTerm = keySearchInput.value.trim();
+                
+                if (!searchTerm) {
+                    searchResults.classList.remove('active');
+                    return;
+                }
+
+                const searchTermUpper = searchTerm.toUpperCase();
+                const foundResults = [];
+
+                // First, try to find as a key (e.g., "A4", "AB1")
+                const item = data[searchTermUpper];
+                if (item) {
+                    foundResults.push({ key: searchTermUpper, item: item });
+                } else {
+                    // If not found as key, search by ID (e.g., "111.222.33")
+                    // Find all keys that contain this ID
+                    for (const key in data) {
+                        const dataItem = data[key];
+                        if (dataItem && dataItem.items) {
+                            const foundItem = dataItem.items.find(itemObj => 
+                                itemObj.id && itemObj.id === searchTerm
+                            );
+                            if (foundItem) {
+                                foundResults.push({ key: key, item: dataItem });
+                            }
+                        }
+                    }
+                }
+
+                if (foundResults.length === 0) {
+                    // Not found as key or ID
+                    searchResults.innerHTML = '<div class="search-no-results">Not found: ' + searchTerm + '</div>';
+                    searchResults.classList.add('active');
+                    return;
+                }
+
+                // Clear colorDesc selection first
+                selectedColorDescs.clear();
+                const colorDescItems = document.querySelectorAll('.color-desc-item');
+                colorDescItems.forEach(colorDescItem => {
+                    colorDescItem.classList.remove('active');
+                });
+                
+                // Deactivate all areas first
+                const areaItems = document.querySelectorAll('.area-item');
+                areaItems.forEach(areaItem => {
+                    areaItem.classList.remove('active');
+                });
+
+                // Collect unique areas to activate
+                const areasToActivate = new Set();
+                foundResults.forEach(result => {
+                    if (result.item.area) {
+                        areasToActivate.add(result.item.area);
+                    }
+                });
+
+                // Activate all areas that contain the found keys/IDs
+                areaItems.forEach(areaItem => {
+                    const areaName = areaItem.dataset.areaName || areaItem.textContent.split(' ')[0];
+                    if (areasToActivate.has(areaName)) {
+                        areaItem.classList.add('active');
+                    }
+                });
+
+                // Update currentArea to first found area (or last if multiple)
+                if (areasToActivate.size > 0) {
+                    currentArea = Array.from(areasToActivate)[0];
+                }
+
+                // Update area boxes and info area
+                updateAreaBoxes();
+                updateInfoArea();
+
+                // Display all results
+                searchResults.innerHTML = '';
+                foundResults.forEach(result => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'search-result-item';
+
+                    // Key
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'search-result-key';
+                    keyDiv.textContent = result.key;
+                    resultDiv.appendChild(keyDiv);
+
+                    // Area
+                    const areaDiv = document.createElement('div');
+                    areaDiv.className = 'search-result-info';
+                    areaDiv.innerHTML = '<strong>Area:</strong> ' + (result.item.area || 'N/A');
+                    resultDiv.appendChild(areaDiv);
+
+                    // ColorDesc
+                    const colorDescDiv = document.createElement('div');
+                    colorDescDiv.className = 'search-result-info';
+                    colorDescDiv.innerHTML = '<strong>Description:</strong> ' + (result.item.colorDesc || 'N/A');
+                    resultDiv.appendChild(colorDescDiv);
+
+                    // Items (IDs)
+                    if (result.item.items && result.item.items.length > 0) {
+                        const itemsDiv = document.createElement('div');
+                        itemsDiv.className = 'search-result-items';
+                        const itemsTitle = document.createElement('div');
+                        itemsTitle.className = 'search-result-info';
+                        itemsTitle.innerHTML = '<strong>Items (' + result.item.items.length + '):</strong>';
+                        itemsDiv.appendChild(itemsTitle);
+
+                        result.item.items.forEach(itemObj => {
+                            const itemIdDiv = document.createElement('div');
+                            itemIdDiv.className = 'search-result-item-id';
+                            // Highlight the searched ID if it matches
+                            if (itemObj.id === searchTerm) {
+                                itemIdDiv.style.color = '#4a9eff';
+                                itemIdDiv.style.fontWeight = 'bold';
+                            }
+                            itemIdDiv.textContent = itemObj.id || 'N/A';
+                            itemsDiv.appendChild(itemIdDiv);
+                        });
+
+                        resultDiv.appendChild(itemsDiv);
+                    } else {
+                        const noItemsDiv = document.createElement('div');
+                        noItemsDiv.className = 'search-result-info';
+                        noItemsDiv.textContent = 'No items found';
+                        resultDiv.appendChild(noItemsDiv);
+                    }
+
+                    searchResults.appendChild(resultDiv);
+                });
+
+                searchResults.classList.add('active');
+            }
+
+            // Search button click
+            if (searchBtn) {
+                searchBtn.addEventListener('click', performSearch);
+            }
+
+            // Enter key in search input
+            if (keySearchInput) {
+                keySearchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch();
                     }
                 });
             }
@@ -1235,6 +1748,8 @@
             }
             // Update area boxes when window resizes
             updateAreaBoxes();
+            // Update info area when window resizes
+            updateInfoArea();
         }
 
         // Initialize draggable box when page loads
