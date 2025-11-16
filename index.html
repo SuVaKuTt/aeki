@@ -66,7 +66,7 @@
 
         .area-item.active {
             background-color: #2d2d2d;
-            border-left-color: #8b0000;
+            border-left-color: #FFD700;
             color: #ffffff;
             font-weight: bold;
         }
@@ -303,11 +303,11 @@
         }
 
         .map-area-box .area-label {
-            color: #ffffff;
+            color: #4a9eff;
             font-size: 12px;
             font-weight: bold;
             text-align: center;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
             word-wrap: break-word;
             max-width: 100%;
         }
@@ -445,7 +445,7 @@
             }
 
             .area-item.active {
-                border-left-color: #8b0000;
+                border-left-color: #FFD700;
                 border-bottom-color: transparent;
             }
 
@@ -779,6 +779,13 @@
 
         // Select/deselect colorDesc (toggle)
         function selectColorDesc(colorDesc) {
+            // Clear search results
+            const searchResults = document.getElementById('searchResults');
+            if (searchResults) {
+                searchResults.classList.remove('active');
+                searchResults.innerHTML = '';
+            }
+            
             // Deactivate all areas when colorDesc is selected
             const areaItems = document.querySelectorAll('.area-item');
             areaItems.forEach(item => {
@@ -813,6 +820,13 @@
 
         // Select/deselect area (toggle)
         function selectArea(area) {
+            // Clear search results
+            const searchResults = document.getElementById('searchResults');
+            if (searchResults) {
+                searchResults.classList.remove('active');
+                searchResults.innerHTML = '';
+            }
+            
             // Deactivate all colorDescs when area is selected
             selectedColorDescs.clear();
             const colorDescItems = document.querySelectorAll('.color-desc-item');
@@ -1082,7 +1096,11 @@
                     if (selectedColorDescs.size > 0) {
                         // ColorDesc mode: show selected colorDesc in header
                         const colorDescArray = Array.from(selectedColorDescs);
-                        header.textContent = `Area Info, ${colorDescArray.join(', ')}`;
+                        // Make colorDesc words blue
+                        const colorDescsHtml = colorDescArray.map(desc => 
+                            `<span style="color: #4a9eff;">${desc}</span>`
+                        ).join(', ');
+                        header.innerHTML = `Area Info, ${colorDescsHtml}`;
                     } else {
                         // Area mode: show default header
                         header.textContent = 'Area Info';
@@ -1236,7 +1254,11 @@
                         colorDescItem.className = 'info-area-item';
                         colorDescItem.style.marginTop = '10px';
                         colorDescItem.style.fontStyle = 'italic';
-                        colorDescItem.textContent = `Items: ${colorDescsArray.join(', ')}`;
+                        // Make colorDesc words yellow
+                        const colorDescsHtml = colorDescsArray.map(desc => 
+                            `<span style="color: #FFD700;">${desc}</span>`
+                        ).join(', ');
+                        colorDescItem.innerHTML = `Items: ${colorDescsHtml}`;
                         section.appendChild(colorDescItem);
                     }
                 }
@@ -1457,7 +1479,11 @@
                     // ColorDesc
                     const colorDescDiv = document.createElement('div');
                     colorDescDiv.className = 'search-result-info';
-                    colorDescDiv.innerHTML = '<strong>Description:</strong> ' + (result.item.colorDesc || 'N/A');
+                    const colorDescValue = result.item.colorDesc || 'N/A';
+                    const colorDescHtml = colorDescValue !== 'N/A' 
+                        ? `<span style="color: #4a9eff;">${colorDescValue}</span>`
+                        : colorDescValue;
+                    colorDescDiv.innerHTML = '<strong>Description:</strong> ' + colorDescHtml;
                     resultDiv.appendChild(colorDescDiv);
 
                     // Items (IDs)
