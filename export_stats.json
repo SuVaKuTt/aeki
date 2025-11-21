@@ -14,7 +14,7 @@
     },
     "MNOP": {
       "columnsProcessed": 17,
-      "items": 489
+      "items": 490
     },
     "QRST": {
       "columnsProcessed": 35,
@@ -24,16 +24,32 @@
       "columnsProcessed": 16,
       "items": 651
     },
-    "AA.AB.AC.AD": {
-      "columnsProcessed": 23,
-      "items": 329
+    "A.ABCDE": {
+      "columnsProcessed": 34,
+      "items": 664
+    },
+    "AF": {
+      "columnsProcessed": 27,
+      "items": 188
+    },
+    "A.GHiJK": {
+      "columnsProcessed": 16,
+      "items": 497
+    },
+    "A.LMNOT": {
+      "columnsProcessed": 33,
+      "items": 902
+    },
+    "A.PQRS": {
+      "columnsProcessed": 32,
+      "items": 530
     }
   },
   "letters": {
     "A": {
-      "entries": 383,
+      "entries": 2835,
       "totalQty": 3877,
-      "uniqueIds": 297
+      "uniqueIds": 2023
     },
     "B": {
       "entries": 58,
@@ -96,9 +112,9 @@
       "uniqueIds": 144
     },
     "O": {
-      "entries": 126,
+      "entries": 127,
       "totalQty": 0,
-      "uniqueIds": 119
+      "uniqueIds": 120
     },
     "N": {
       "entries": 95,

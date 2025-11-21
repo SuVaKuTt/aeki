@@ -1,5 +1,6 @@
 {
   "ABCD": {
+    "map": "map_2floor.jpg",
     "x": 292,
     "y": 723,
     "width": 121,
@@ -10,6 +11,7 @@
     "relHeight": 6.47
   },
   "EFGHi": {
+    "map": "map_2floor.jpg",
     "x": 422,
     "y": 636,
     "width": 50,
@@ -20,6 +22,7 @@
     "relHeight": 12.16
   },
   "JKL": {
+    "map": "map_2floor.jpg",
     "x": 296,
     "y": 671,
     "width": 121,
@@ -30,6 +33,7 @@
     "relHeight": 6.47
   },
   "MNOP": {
+    "map": "map_2floor.jpg",
     "x": 283,
     "y": 581,
     "width": 50,
@@ -40,6 +44,7 @@
     "relHeight": 12.16
   },
   "QRST": {
+    "map": "map_2floor.jpg",
     "x": 451,
     "y": 88,
     "width": 50,
@@ -50,6 +55,7 @@
     "relHeight": 15.78
   },
   "UVWXYZ": {
+    "map": "map_2floor.jpg",
     "x": 290,
     "y": 201,
     "width": 118,
@@ -59,7 +65,8 @@
     "relWidth": 21.97,
     "relHeight": 6.47
   },
-  "AA.AB.AC.AD": {
+  "A.ABCDE": {
+    "map": "map_2floor.jpg",
     "x": 514,
     "y": 467,
     "width": 137,
@@ -68,6 +75,49 @@
     "relY": 60.41,
     "relWidth": 25.51,
     "relHeight": 6.47
+  },
+  "AF": {
+    "map": "map_2floor.jpg",
+    "x": 757,
+    "y": 524,
+    "width": 50,
+    "height": 50,
+    "relX": 71.14,
+    "relY": 67.72,
+    "relWidth": 9.31,
+    "relHeight": 6.47
+  },
+  "A.PQRS": {
+    "map": "map_1floor.jpg",
+    "x": 550,
+    "y": 607,
+    "width": 175,
+    "height": 50,
+    "relX": 31.19,
+    "relY": 78.46,
+    "relWidth": 32.59,
+    "relHeight": 6.47
+  },
+  "A.GHiJK": {
+    "map": "map_1floor.jpg",
+    "x": 675,
+    "y": 360,
+    "width": 112,
+    "height": 50,
+    "relX": 54.47,
+    "relY": 46.51,
+    "relWidth": 20.86,
+    "relHeight": 6.47
+  },
+  "A.LMNOT": {
+    "map": "map_1floor.jpg",
+    "x": 547,
+    "y": 363,
+    "width": 112,
+    "height": 50,
+    "relX": 30.63,
+    "relY": 46.90,
+    "relWidth": 20.86,
+    "relHeight": 6.47
   }
 }
-

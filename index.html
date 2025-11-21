@@ -547,6 +547,17 @@
         let areaToCoordinateMap = {}; // Maps Area1 -> ABCD, Area2 -> EFGHi, etc.
         let uniqueColorDescs = []; // All unique colorDesc values from entire JSON
         let selectedColorDescs = new Set(); // Selected colorDesc filters
+        let currentMap = 'map_2floor.jpg'; // Current map image (default: floor2)
+        
+        // Hardcoded: Area9, Area10, Area11 are on floor1 (map_1floor.jpg)
+        function isFloor1Area(area) {
+            return area === 'Area9' || area === 'Area10' || area === 'Area11';
+        }
+        
+        // Get map for area
+        function getMapForArea(area) {
+            return isFloor1Area(area) ? 'map_1floor.jpg' : 'map_2floor.jpg';
+        }
 
         // Check if running locally (file://) or on GitHub Pages
         function isLocal() {
@@ -852,13 +863,49 @@
                 }
             }
             
-            // Update currentArea to last selected area (for potential future use)
+            // Get all active areas
             const activeAreas = Array.from(areaItems)
                 .filter(item => item.classList.contains('active'))
                 .map(item => item.dataset.areaName || item.textContent.split(' ')[0]);
             
-            if (activeAreas.length > 0) {
-                currentArea = activeAreas[activeAreas.length - 1]; // Last selected
+            // Check if selected area is floor1 or floor2
+            const selectedAreaMap = getMapForArea(area);
+            
+            // If selecting an area, deselect all areas from different floor
+            if (clickedItem && clickedItem.classList.contains('active')) {
+                const otherFloorAreas = activeAreas.filter(a => getMapForArea(a) !== selectedAreaMap);
+                otherFloorAreas.forEach(otherArea => {
+                    const otherItem = Array.from(areaItems).find(item => 
+                        item.dataset.areaName === otherArea || item.textContent.includes(otherArea)
+                    );
+                    if (otherItem) {
+                        otherItem.classList.remove('active');
+                        console.log('Deselected area from different floor:', otherArea);
+                    }
+                });
+                
+                // Update map image if needed
+                if (currentMap !== selectedAreaMap) {
+                    currentMap = selectedAreaMap;
+                    mapImage.src = currentMap;
+                    console.log('Changed map to:', currentMap);
+                }
+            }
+            
+            // Update currentArea to last selected area (for potential future use)
+            const finalActiveAreas = Array.from(areaItems)
+                .filter(item => item.classList.contains('active'))
+                .map(item => item.dataset.areaName || item.textContent.split(' ')[0]);
+            
+            if (finalActiveAreas.length > 0) {
+                currentArea = finalActiveAreas[finalActiveAreas.length - 1]; // Last selected
+                // Update map based on active areas
+                const activeMap = getMapForArea(currentArea);
+                if (currentMap !== activeMap) {
+                    currentMap = activeMap;
+                    mapImage.src = currentMap;
+                    console.log('Changed map to:', currentMap);
+                }
             } else {
                 currentArea = '';
             }
@@ -993,6 +1040,31 @@
                     return aNum - bNum;
                 });
                 console.log('Areas with selected colorDesc:', areasToShow);
+                
+                // In ColorDesc mode, determine map from first area found
+                // If areas are from different floors, prefer floor2 (default)
+                if (areasToShow.length > 0) {
+                    const firstAreaMap = getMapForArea(areasToShow[0]);
+                    // Check if all areas are on same floor
+                    const allSameFloor = areasToShow.every(area => getMapForArea(area) === firstAreaMap);
+                    if (allSameFloor) {
+                        // All areas on same floor, use that map
+                        if (currentMap !== firstAreaMap) {
+                            currentMap = firstAreaMap;
+                            mapImage.src = currentMap;
+                            console.log('Changed map to:', currentMap);
+                        }
+                    } else {
+                        // Mixed floors - prefer floor2, filter to show only floor2 areas
+                        console.log('Mixed floors detected in ColorDesc mode, showing only floor2 areas');
+                        areasToShow = areasToShow.filter(area => getMapForArea(area) === 'map_2floor.jpg');
+                        if (currentMap !== 'map_2floor.jpg') {
+                            currentMap = 'map_2floor.jpg';
+                            mapImage.src = currentMap;
+                            console.log('Changed map to:', currentMap);
+                        }
+                    }
+                }
             } else {
                 // Area mode: show only active areas
                 const areaItems = document.querySelectorAll('.area-item');
@@ -1022,8 +1094,34 @@
             console.log('Image dimensions:', imgRect.width, 'x', imgRect.height);
             console.log('Image position:', imgLeft, imgTop);
             
+            // Filter areas to show only those matching current map
+            // Get current map from first active area (or default to floor2)
+            let targetMap = currentMap;
+            if (areasToShow.length > 0) {
+                targetMap = getMapForArea(areasToShow[0]);
+            }
+            
+            // Filter areas to show only those on the current map
+            const filteredAreasToShow = areasToShow.filter(areaName => {
+                const areaMap = getMapForArea(areaName);
+                return areaMap === targetMap;
+            });
+            
+            // Update map image if needed
+            if (currentMap !== targetMap && filteredAreasToShow.length > 0) {
+                currentMap = targetMap;
+                mapImage.src = currentMap;
+                console.log('Changed map to:', currentMap);
+                // Wait for image to load before continuing
+                mapImage.addEventListener('load', function onLoad() {
+                    mapImage.removeEventListener('load', onLoad);
+                    updateAreaBoxes();
+                });
+                return;
+            }
+            
             // Create boxes for areas to show
-            areasToShow.forEach(areaName => {
+            filteredAreasToShow.forEach(areaName => {
                 // Get coordinate key from mapping (Area1 -> ABCD, etc.)
                 const coordinateKey = areaToCoordinateMap[areaName];
                 if (!coordinateKey) {
@@ -1037,6 +1135,12 @@
                 if (!coords) {
                     console.warn(`No coordinates found for coordinate key: ${coordinateKey}`);
                     console.log('Available coordinate keys:', Object.keys(coordinatesData));
+                    return;
+                }
+                
+                // Check if coordinates match current map
+                if (coords.map && coords.map !== currentMap) {
+                    console.log(`Skipping ${areaName} - coordinates are for ${coords.map}, but current map is ${currentMap}`);
                     return;
                 }
                 

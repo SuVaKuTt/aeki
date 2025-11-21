@@ -1,3 +1,5 @@
+map_2floor.jpg:
+
 ABCD:
 X: 292px, Y: 723px, Width: 121px, Height: 50px
 Relative: X: 13.41%, Y: 93.53%, Width: 22.53%, Height: 6.47%
@@ -22,10 +24,32 @@ UVWXYZ:
 X: 290px, Y: 201px, Width: 118px, Height: 50px
 Relative: X: 13.04%, Y: 25.94%, Width: 21.97%, Height: 6.47%
 
-AA.AB.AC.AD:
+A.ABCDE:
 X: 514px, Y: 467px, Width: 137px, Height: 50px
 Relative: X: 54.75%, Y: 60.41%, Width: 25.51%, Height: 6.47%
 
+AF:
+X: 757px, Y: 524px, Width: 50px, Height: 50px
+Relative: X: 71.14%, Y: 67.72%, Width: 9.31%, Height: 6.47%
 
+Displays1:
+X: 662px, Y: 524px, Width: 91px, Height: 50px
+Relative: X: 53.45%, Y: 67.72%, Width: 16.95%, Height: 6.47%
 
+map_1floor.jpg:
 
+A.PQRS:
+X: 550px, Y: 607px, Width: 175px, Height: 50px
+Relative: X: 31.19%, Y: 78.46%, Width: 32.59%, Height: 6.47%
+
+A.GHiJK:
+X: 675px, Y: 360px, Width: 112px, Height: 50px
+Relative: X: 54.47%, Y: 46.51%, Width: 20.86%, Height: 6.47%
+
+A.LMNOT:
+X: 547px, Y: 363px, Width: 112px, Height: 50px
+Relative: X: 30.63%, Y: 46.90%, Width: 20.86%, Height: 6.47%
+
+Displays2:
+X: 457px, Y: 611px, Width: 72px, Height: 55px
+Relative: X: 13.87%, Y: 78.98%, Width: 13.41%, Height: 7.12%
