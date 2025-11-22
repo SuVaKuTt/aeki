@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockFinder Map (Alpha)</title>
+    <title>StockFinder Map</title>
     <style>
         * {
             margin: 0;
@@ -22,9 +22,10 @@
 
         h1 {
             color: #ffffff;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
             padding: 20px 20px 0;
+            font-size: 1.2em; /* Väiksem kui vaikimisi h1 suurus */
         }
 
         .file-container {
@@ -69,6 +70,10 @@
             border-left-color: #FFD700;
             color: #ffffff;
             font-weight: bold;
+        }
+
+        .area-item.active.floor1 {
+            border-left-color: #ff4444;
         }
 
         /* ColorDesc items - same style as area items */
@@ -312,6 +317,35 @@
             max-width: 100%;
         }
 
+        /* Area 11 special layout - two rows */
+        .map-area-box.area-11 {
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .map-area-box .area-info-text {
+            color: #4a9eff;
+            font-size: 9px;
+            font-weight: normal;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            word-wrap: break-word;
+            max-width: 100%;
+            margin-top: 2px;
+        }
+
+        /* Floor label styles */
+        .floor-label {
+            position: absolute;
+            color: #4a9eff;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 5;
+            display: none; /* Hidden by default, shown via JavaScript */
+        }
+
         .area-box:hover {
             background-color: rgba(139, 0, 0, 0.3);
         }
@@ -449,6 +483,10 @@
                 border-bottom-color: transparent;
             }
 
+            .area-item.active.floor1 {
+                border-left-color: #ff4444;
+            }
+
             .color-desc-item {
                 padding: 10px 12px;
                 white-space: nowrap;
@@ -492,7 +530,7 @@
     </style>
 </head>
 <body>
-    <h1>StockFinder Map (Alpha)</h1>
+    <h1>StockFinder Map</h1>
     <div class="main-container">
         <div class="sidebar" id="sidebar">
             <div class="file-container">
@@ -505,6 +543,8 @@
         <div class="content-area">
             <div class="map-container" id="mapContainer">
                 <img src="map_2floor.jpg" alt="Map" class="map-image" id="mapImage" />
+                <div class="floor-label top-left" id="floorLabelTopLeft"></div>
+                <div class="floor-label bottom-right" id="floorLabelBottomRight"></div>
                 <div class="area-box" id="areaBox">
                     <div class="resize-handle nw"></div>
                     <div class="resize-handle ne"></div>
@@ -550,13 +590,75 @@
         let currentMap = 'map_2floor.jpg'; // Current map image (default: floor2)
         
         // Hardcoded: Area9, Area10, Area11 are on floor1 (map_1floor.jpg)
+        // Displays2 is also on floor1
         function isFloor1Area(area) {
-            return area === 'Area9' || area === 'Area10' || area === 'Area11';
+            return area === 'Area9' || area === 'Area10' || area === 'Area11' || area === 'Displays2';
         }
         
         // Get map for area
         function getMapForArea(area) {
             return isFloor1Area(area) ? 'map_1floor.jpg' : 'map_2floor.jpg';
+        }
+
+        // Update floor labels based on current map
+        // Teksti asukohad:
+        // - topLeftLabel: vasak ülemine nurk (pildi vasak ülemine nurk + 10px offset)
+        // - bottomRightLabel: parem alumine nurk (pildi parem alumine nurk + 10px offset)
+        // Mõlemal kaardil kuvatakse sama tekst mõlemas nurgas:
+        // - map_1floor.jpg: "1st Floor" nii vasakul üleval kui ka paremal all
+        // - map_2floor.jpg: "2nd Floor" nii vasakul üleval kui ka paremal all
+        function updateFloorLabels() {
+            const topLeftLabel = document.getElementById('floorLabelTopLeft');
+            const bottomRightLabel = document.getElementById('floorLabelBottomRight');
+            
+            if (!topLeftLabel || !bottomRightLabel || !mapImage || !mapContainer) return;
+            
+            // Wait for image to load
+            if (!mapImage.complete) {
+                mapImage.addEventListener('load', updateFloorLabels);
+                return;
+            }
+            
+            // Get image position relative to container
+            // imgLeft, imgTop: pildi vasak ülemine nurk konteineri suhtes
+            // imgRight, imgBottom: pildi parem alumine nurk konteineri suhtes
+            const imgRect = mapImage.getBoundingClientRect();
+            const containerRect = mapContainer.getBoundingClientRect();
+            
+            // Check if image dimensions are valid (layout might not be ready yet)
+            if (imgRect.width === 0 || imgRect.height === 0 || containerRect.width === 0 || containerRect.height === 0) {
+                // Layout not ready yet, try again on next frame
+                requestAnimationFrame(updateFloorLabels);
+                return;
+            }
+            
+            const imgLeft = imgRect.left - containerRect.left;
+            const imgTop = imgRect.top - containerRect.top;
+            const imgRight = imgLeft + imgRect.width;
+            const imgBottom = imgTop + imgRect.height;
+            
+            // Determine text based on current map
+            const floorText = currentMap === 'map_1floor.jpg' ? '1st Floor' : '2nd Floor';
+            
+            // Show both labels with same text
+            // Top-left label: vasak ülemine nurk (imgLeft + 10px, imgTop + 10px)
+            topLeftLabel.textContent = floorText;
+            topLeftLabel.style.display = 'block';
+            topLeftLabel.style.left = (imgLeft + 10) + 'px';
+            topLeftLabel.style.top = (imgTop + 10) + 'px';
+            topLeftLabel.style.right = 'auto';
+            topLeftLabel.style.bottom = 'auto';
+            
+            // Bottom-right label: parem alumine nurk
+            // Kasutame right ja bottom, et tekst oleks pildi paremast alamisest nurgast 10px kaugusel
+            bottomRightLabel.textContent = floorText;
+            bottomRightLabel.style.display = 'block';
+            bottomRightLabel.style.left = 'auto';
+            bottomRightLabel.style.top = 'auto';
+            // right: konteineri parem serv - pildi parem serv + 10px offset
+            bottomRightLabel.style.right = (containerRect.width - imgRight + 10) + 'px';
+            // bottom: konteineri alumine serv - pildi alumine serv + 10px offset
+            bottomRightLabel.style.bottom = (containerRect.height - imgBottom + 10) + 'px';
         }
 
         // Check if running locally (file://) or on GitHub Pages
@@ -584,6 +686,12 @@
                     data = JSON.parse(text);
                     extractAreas();
                     renderSidebar();
+                    // Update floor labels after sidebar render (layout might have changed)
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            updateFloorLabels();
+                        });
+                    });
                     // Auto-select first area if available
                     if (areasList.length > 0) {
                         selectArea(areasList[0]);
@@ -613,6 +721,12 @@
                         createAreaCoordinateMapping();
                         renderSidebar();
                     }
+                    // Update floor labels after sidebar render (layout might have changed)
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            updateFloorLabels();
+                        });
+                    });
                     // Auto-select first area if available
                     if (areasList.length > 0) {
                         selectArea(areasList[0]);
@@ -701,6 +815,11 @@
                     const areaItem = document.createElement('div');
                     areaItem.className = 'area-item';
                     
+                    // Add floor1 class for floor1 areas (Area9, Area10, Area11, Displays2)
+                    if (isFloor1Area(area)) {
+                        areaItem.classList.add('floor1');
+                    }
+                    
                     const coordinateKey = areaToCoordinateMap[area];
                     if (coordinateKey) {
                         areaItem.textContent = `${area} (${coordinateKey})`;
@@ -754,6 +873,11 @@
                 for (const area of areasList) {
                     const areaItem = document.createElement('div');
                     areaItem.className = 'area-item';
+                    
+                    // Add floor1 class for floor1 areas (Area9, Area10, Area11, Displays2)
+                    if (isFloor1Area(area)) {
+                        areaItem.classList.add('floor1');
+                    }
                     
                     const coordinateKey = areaToCoordinateMap[area];
                     if (coordinateKey) {
@@ -888,6 +1012,7 @@
                 if (currentMap !== selectedAreaMap) {
                     currentMap = selectedAreaMap;
                     mapImage.src = currentMap;
+                    updateFloorLabels();
                     console.log('Changed map to:', currentMap);
                 }
             }
@@ -904,6 +1029,7 @@
                 if (currentMap !== activeMap) {
                     currentMap = activeMap;
                     mapImage.src = currentMap;
+                    updateFloorLabels();
                     console.log('Changed map to:', currentMap);
                 }
             } else {
@@ -933,6 +1059,12 @@
                 createAreaCoordinateMapping();
                 // Update sidebar to show coordinate names
                 renderSidebar();
+                // Update floor labels after sidebar render (layout might have changed)
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        updateFloorLabels();
+                    });
+                });
                 // Wait a bit for image to be ready, then update boxes
                 setTimeout(() => {
                     updateAreaBoxes();
@@ -959,6 +1091,12 @@
                     createAreaCoordinateMapping();
                     // Update sidebar to show coordinate names
                     renderSidebar();
+                    // Update floor labels after sidebar render (layout might have changed)
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            updateFloorLabels();
+                        });
+                    });
                     // Wait a bit for image to be ready, then update boxes
                     setTimeout(() => {
                         updateAreaBoxes();
@@ -982,12 +1120,60 @@
             const coordinateKeys = Object.keys(coordinatesData);
             console.log('Coordinate keys in order:', coordinateKeys);
             
-            // Map each area to corresponding coordinate key by index
-            for (let i = 0; i < areasList.length && i < coordinateKeys.length; i++) {
-                const areaName = areasList[i];
+            // Add Displays1 and Displays2 to areasList if they exist in coordinates but not in export.json
+            const displaysAreas = ['Displays1', 'Displays2'];
+            displaysAreas.forEach(displayArea => {
+                if (coordinateKeys.includes(displayArea) && !areasList.includes(displayArea)) {
+                    areasList.push(displayArea);
+                    console.log(`Added ${displayArea} to areasList (not in export.json)`);
+                }
+            });
+            
+            // Re-sort areasList to match coordinates.json order
+            // Create a new sorted list based on coordinateKeys order
+            const sortedAreasList = [];
+            const regularAreasForSort = areasList.filter(a => a !== 'Displays1' && a !== 'Displays2');
+            let regularAreaIndexForSort = 0;
+            
+            // Build sorted list following coordinateKeys order
+            for (let i = 0; i < coordinateKeys.length; i++) {
                 const coordinateKey = coordinateKeys[i];
-                areaToCoordinateMap[areaName] = coordinateKey;
-                console.log(`Mapped ${areaName} -> ${coordinateKey}`);
+                
+                // If this is a Displays area, add it directly
+                if (coordinateKey === 'Displays1' || coordinateKey === 'Displays2') {
+                    if (areasList.includes(coordinateKey)) {
+                        sortedAreasList.push(coordinateKey);
+                    }
+                } else if (regularAreaIndexForSort < regularAreasForSort.length) {
+                    // For regular areas, add them in order
+                    sortedAreasList.push(regularAreasForSort[regularAreaIndexForSort]);
+                    regularAreaIndexForSort++;
+                }
+            }
+            
+            // Replace areasList with sorted version
+            areasList = sortedAreasList;
+            console.log('Sorted areasList:', areasList);
+            
+            // Map each coordinate key to corresponding area by index
+            // Filter out Displays areas from areasList for regular mapping
+            const regularAreas = areasList.filter(a => a !== 'Displays1' && a !== 'Displays2');
+            let regularAreaIndex = 0;
+            
+            for (let i = 0; i < coordinateKeys.length; i++) {
+                const coordinateKey = coordinateKeys[i];
+                
+                // If this coordinate key is Displays1 or Displays2, use it directly
+                if (coordinateKey === 'Displays1' || coordinateKey === 'Displays2') {
+                    areaToCoordinateMap[coordinateKey] = coordinateKey;
+                    console.log(`Mapped ${coordinateKey} -> ${coordinateKey} (display area)`);
+                } else if (regularAreaIndex < regularAreas.length) {
+                    // For regular areas, map from regularAreas list
+                    const areaName = regularAreas[regularAreaIndex];
+                    areaToCoordinateMap[areaName] = coordinateKey;
+                    console.log(`Mapped ${areaName} -> ${coordinateKey}`);
+                    regularAreaIndex++;
+                }
             }
         }
 
@@ -1052,6 +1238,7 @@
                         if (currentMap !== firstAreaMap) {
                             currentMap = firstAreaMap;
                             mapImage.src = currentMap;
+                            updateFloorLabels();
                             console.log('Changed map to:', currentMap);
                         }
                     } else {
@@ -1061,6 +1248,7 @@
                         if (currentMap !== 'map_2floor.jpg') {
                             currentMap = 'map_2floor.jpg';
                             mapImage.src = currentMap;
+                            updateFloorLabels();
                             console.log('Changed map to:', currentMap);
                         }
                     }
@@ -1111,6 +1299,7 @@
             if (currentMap !== targetMap && filteredAreasToShow.length > 0) {
                 currentMap = targetMap;
                 mapImage.src = currentMap;
+                updateFloorLabels();
                 console.log('Changed map to:', currentMap);
                 // Wait for image to load before continuing
                 mapImage.addEventListener('load', function onLoad() {
@@ -1160,6 +1349,10 @@
                 // Create box element
                 const box = document.createElement('div');
                 box.className = 'map-area-box';
+                // Add special class for Area 11
+                if (areaName === 'Area11') {
+                    box.classList.add('area-11');
+                }
                 box.style.left = boxLeft + 'px';
                 box.style.top = boxTop + 'px';
                 box.style.width = boxWidth + 'px';
@@ -1172,6 +1365,14 @@
                 const spacedKey = coordinateKey.split('').join(' ');
                 label.textContent = spacedKey;
                 box.appendChild(label);
+                
+                // For Area 11, add additional info text below the label
+                if (areaName === 'Area11') {
+                    const infoText = document.createElement('div');
+                    infoText.className = 'area-info-text';
+                    infoText.textContent = 'Ground floor';
+                    box.appendChild(infoText);
+                }
                 
                 mapContainer.appendChild(box);
                 console.log(`Box added for ${areaName} at position:`, {
@@ -1247,6 +1448,9 @@
 
             // Process each area
             areasToShow.forEach(areaName => {
+                // Check if this is a display area (no data in export.json)
+                const isDisplayArea = areaName === 'Displays1' || areaName === 'Displays2';
+                
                 // Get all keys for this area, filtered by colorDesc if selected
                 const areaKeys = [];
                 for (const key in data) {
@@ -1263,20 +1467,45 @@
                         }
                     }
                 }
+                
+                // If this is a display area and has no data, show empty info
+                if (isDisplayArea && areaKeys.length === 0) {
+                    // Get coordinate key for display
+                    const coordinateKey = areaToCoordinateMap[areaName] || '';
+                    const coordinateDisplay = coordinateKey ? ` (${coordinateKey})` : '';
+                    
+                    // Create section
+                    const section = document.createElement('div');
+                    section.className = 'info-area-section';
+                    
+                    // Create title
+                    const title = document.createElement('div');
+                    title.className = 'info-area-section-title';
+                    title.textContent = `${areaName}${coordinateDisplay} (Display area - no data)`;
+                    section.appendChild(title);
+                    
+                    infoContent.appendChild(section);
+                    return; // Skip further processing for display areas without data
+                }
+                
+                // If regular area has no keys, skip it
+                if (areaKeys.length === 0) {
+                    return;
+                }
 
                 // Group by letter prefix and find continuous ranges
-                // Keys can be "A1", "AB1", "AC22", etc.
+                // Keys can be "A1", "AB1", "AC22", "i1", etc. (supports both uppercase and lowercase)
                 const letterRanges = {};
                 areaKeys.forEach(key => {
                     // Extract letters and number from key using regex
-                    // Match: letters at start, then numbers
-                    const match = key.match(/^([A-Z]+)(\d+)$/);
+                    // Match: letters at start (uppercase or lowercase), then numbers
+                    const match = key.match(/^([A-Za-z]+)(\d+)$/);
                     if (!match) {
                         console.warn(`Invalid key format: ${key}`);
                         return;
                     }
                     
-                    const letterPrefix = match[1]; // "A", "AB", "AC", etc.
+                    const letterPrefix = match[1]; // "A", "AB", "AC", "i", etc.
                     const number = parseInt(match[2], 10); // 1, 22, etc.
                     
                     if (!letterRanges[letterPrefix]) {
@@ -1391,6 +1620,7 @@
             // Add image load handler
             mapImage.addEventListener('load', function() {
                 console.log('Map image loaded');
+                updateFloorLabels();
                 updateAreaBoxes();
                 updateInfoArea();
             });
@@ -1402,10 +1632,20 @@
             });
             
             // If image is already loaded, update boxes
+            // Use requestAnimationFrame to ensure layout is complete before calculating positions
             if (mapImage.complete) {
                 console.log('Map image already loaded');
-                updateAreaBoxes();
-                updateInfoArea();
+                // Wait for next frame to ensure layout is complete
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        updateFloorLabels();
+                        updateAreaBoxes();
+                        updateInfoArea();
+                    });
+                });
+            } else {
+                // Update floor labels initially (will be updated again when image loads)
+                updateFloorLabels();
             }
             
             // Always show buttons initially, then adjust based on environment
@@ -1498,11 +1738,20 @@
                 const searchTermUpper = searchTerm.toUpperCase();
                 const foundResults = [];
 
-                // First, try to find as a key (e.g., "A4", "AB1")
-                const item = data[searchTermUpper];
+                // First, try to find as a key (e.g., "A4", "AB1", "i1")
+                // Try exact match first (supports lowercase keys like "i1")
+                let item = data[searchTerm];
                 if (item) {
-                    foundResults.push({ key: searchTermUpper, item: item });
+                    foundResults.push({ key: searchTerm, item: item });
                 } else {
+                    // Try uppercase version (for keys like "A4", "AB1")
+                    item = data[searchTermUpper];
+                    if (item) {
+                        foundResults.push({ key: searchTermUpper, item: item });
+                    }
+                }
+                
+                if (foundResults.length === 0) {
                     // If not found as key, search by ID (e.g., "111.222.33")
                     // Find all keys that contain this ID
                     for (const key in data) {
@@ -1877,6 +2126,8 @@
             if (boxElement && mapImage) {
                 updateCoordinates();
             }
+            // Update floor labels when window resizes
+            updateFloorLabels();
             // Update area boxes when window resizes
             updateAreaBoxes();
             // Update info area when window resizes

@@ -87,15 +87,15 @@
     "relWidth": 9.31,
     "relHeight": 6.47
   },
-  "A.PQRS": {
-    "map": "map_1floor.jpg",
-    "x": 550,
-    "y": 607,
-    "width": 175,
+  "Displays1": {
+    "map": "map_2floor.jpg",
+    "x": 662,
+    "y": 524,
+    "width": 91,
     "height": 50,
-    "relX": 31.19,
-    "relY": 78.46,
-    "relWidth": 32.59,
+    "relX": 53.45,
+    "relY": 67.72,
+    "relWidth": 16.95,
     "relHeight": 6.47
   },
   "A.GHiJK": {
@@ -119,5 +119,27 @@
     "relY": 46.90,
     "relWidth": 20.86,
     "relHeight": 6.47
+  },
+  "A.PQRS": {
+    "map": "map_1floor.jpg",
+    "x": 550,
+    "y": 607,
+    "width": 175,
+    "height": 50,
+    "relX": 31.19,
+    "relY": 78.46,
+    "relWidth": 32.59,
+    "relHeight": 6.47
+  },
+  "Displays2": {
+    "map": "map_1floor.jpg",
+    "x": 457,
+    "y": 611,
+    "width": 72,
+    "height": 55,
+    "relX": 13.87,
+    "relY": 78.98,
+    "relWidth": 13.41,
+    "relHeight": 7.12
   }
 }
