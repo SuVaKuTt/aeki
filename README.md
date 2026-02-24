@@ -79,6 +79,11 @@ Interactive map view that displays areas as rectangular boxes on a floor plan im
 - Responsive design - boxes scale with image resize
 - Support for area labels (text display in boxes)
 - Wide sidebar (250px) to prevent text wrapping
+- **Local Edit Mode (localhost / file:// only)**:
+  - Toggle `Edit mode` to move and resize visible area boxes directly on the map
+  - Add/delete boxes for multi-part areas (e.g., `Displays1`)
+  - Save active floor coordinates to `coordinates-1floor-edited.json` / `coordinates-2floor-edited.json`
+  - Edit tools are hidden on GitHub Pages (public view remains read-only)
 
 **How it works:**
 
@@ -91,6 +96,11 @@ Interactive map view that displays areas as rectangular boxes on a floor plan im
 - Two buttons in the sidebar:
   1. **"Open export.json"** - Loads area names from `export.json` file
   2. **"Open coordinates.json"** - Loads area coordinates from `coordinates.json` file
+- Edit tools (local only):
+  - **"Edit mode: ON/OFF"** - Enables drag/resize for visible boxes
+  - **"Add box to selected area"** - Adds another box to the selected coordinate entry
+  - **"Delete selected box"** - Deletes selected box (keeps at least one)
+  - **"Save active floor JSON"** - Exports only the active floor coordinates
 - Use file dialogs to select the respective JSON files
 - Both files need to be loaded for full functionality
 
@@ -125,7 +135,9 @@ Interactive map view that displays areas as rectangular boxes on a floor plan im
 **Coordinate System:**
 - Coordinates are stored in `coordinates.json` with both absolute (px) and relative (%) values
 - Relative coordinates are used for positioning to ensure boxes scale with the image
-- Each area has: `x`, `y`, `width`, `height` (absolute) and `relX`, `relY`, `relWidth`, `relHeight` (relative)
+- Coordinate entries support two formats:
+  - **Single-box (legacy/current for most areas):** `x`, `y`, `width`, `height`, `relX`, `relY`, `relWidth`, `relHeight`
+  - **Multi-box (used for split areas like `Displays1`):** `boxes: [{ x, y, width, height, relX, relY, relWidth, relHeight, name? }]`
 - Each coordinate entry also has a `map` field indicating which floor plan image to use: `"map_1floor.jpg"` or `"map_2floor.jpg"`
 - **CRITICAL: The order of keys in `coordinates.json` is extremely important!**
   - The mapping is done by index position: first key → Area1, second key → Area2, etc.
@@ -141,6 +153,8 @@ Interactive map view that displays areas as rectangular boxes on a floor plan im
   - Displays1 should be positioned after Area8 (9th position in coordinates.json)
   - Displays2 should be positioned after Area11 (13th position in coordinates.json)
   - The menu order follows the `coordinates.json` order, so Display areas appear in the correct positions
+  - Display areas may use `boxes[]` for multiple visual regions
+  - Each display box may have optional `name` (e.g., `displays_A`, `displays_B`) shown on the map label
 
 **Debugging:**
 - Open browser console (F12) to see detailed logs about:
@@ -153,4 +167,4 @@ Interactive map view that displays areas as rectangular boxes on a floor plan im
 - Draggable/resizable coordinate editor box (hidden by default)
 - Coordinate display panel (hidden by default)
 - Can be enabled by changing CSS `display: none` to `display: block` for `.area-box` and `.coordinates-display`
-
+- Note: this is a separate debug helper from the local `Edit mode` for actual area boxes

@@ -1,145 +1,216 @@
 {
-  "ABCD": {
-    "map": "map_2floor.jpg",
-    "x": 292,
-    "y": 723,
-    "width": 121,
-    "height": 50,
-    "relX": 13.41,
-    "relY": 93.53,
-    "relWidth": 22.53,
-    "relHeight": 6.47
-  },
-  "EFGHi": {
-    "map": "map_2floor.jpg",
-    "x": 422,
-    "y": 636,
-    "width": 50,
-    "height": 94,
-    "relX": 37.62,
-    "relY": 82.28,
-    "relWidth": 9.31,
-    "relHeight": 12.16
-  },
-  "JKL": {
-    "map": "map_2floor.jpg",
-    "x": 296,
-    "y": 671,
-    "width": 121,
-    "height": 50,
-    "relX": 14.15,
-    "relY": 86.80,
-    "relWidth": 22.53,
-    "relHeight": 6.47
-  },
-  "MNOP": {
-    "map": "map_2floor.jpg",
-    "x": 283,
-    "y": 581,
-    "width": 50,
-    "height": 94,
-    "relX": 11.73,
-    "relY": 75.16,
-    "relWidth": 9.31,
-    "relHeight": 12.16
-  },
-  "QRST": {
-    "map": "map_2floor.jpg",
-    "x": 451,
-    "y": 88,
-    "width": 50,
-    "height": 122,
-    "relX": 43.02,
-    "relY": 11.32,
-    "relWidth": 9.31,
-    "relHeight": 15.78
-  },
-  "UVWXYZ": {
-    "map": "map_2floor.jpg",
-    "x": 290,
-    "y": 201,
-    "width": 118,
-    "height": 50,
-    "relX": 13.04,
-    "relY": 25.94,
-    "relWidth": 21.97,
-    "relHeight": 6.47
-  },
-  "A.ABCDE": {
-    "map": "map_2floor.jpg",
-    "x": 514,
-    "y": 467,
-    "width": 137,
-    "height": 50,
-    "relX": 54.75,
-    "relY": 60.41,
-    "relWidth": 25.51,
-    "relHeight": 6.47
-  },
-  "AF": {
-    "map": "map_2floor.jpg",
-    "x": 757,
-    "y": 524,
-    "width": 50,
-    "height": 50,
-    "relX": 71.14,
-    "relY": 67.72,
-    "relWidth": 9.31,
-    "relHeight": 6.47
-  },
-  "Displays1": {
-    "map": "map_2floor.jpg",
-    "x": 662,
-    "y": 524,
-    "width": 91,
-    "height": 50,
-    "relX": 53.45,
-    "relY": 67.72,
-    "relWidth": 16.95,
-    "relHeight": 6.47
-  },
-  "A.GHiJK": {
-    "map": "map_1floor.jpg",
-    "x": 675,
-    "y": 360,
-    "width": 112,
-    "height": 50,
-    "relX": 54.47,
-    "relY": 46.51,
-    "relWidth": 20.86,
-    "relHeight": 6.47
-  },
-  "A.LMNOT": {
-    "map": "map_1floor.jpg",
-    "x": 547,
-    "y": 363,
-    "width": 112,
-    "height": 50,
-    "relX": 30.63,
-    "relY": 46.90,
-    "relWidth": 20.86,
-    "relHeight": 6.47
-  },
-  "A.PQRS": {
-    "map": "map_1floor.jpg",
-    "x": 550,
-    "y": 607,
-    "width": 175,
-    "height": 50,
-    "relX": 31.19,
-    "relY": 78.46,
-    "relWidth": 32.59,
-    "relHeight": 6.47
-  },
-  "Displays2": {
-    "map": "map_1floor.jpg",
-    "x": 457,
-    "y": 611,
-    "width": 72,
-    "height": 55,
-    "relX": 13.87,
-    "relY": 78.98,
-    "relWidth": 13.41,
-    "relHeight": 7.12
-  }
+    "ABCDJKL":  {
+                    "map":  "map_2floor.jpg",
+                    "x":  181,
+                    "y":  687,
+                    "width":  144,
+                    "height":  50,
+                    "relX":  8.57,
+                    "relY":  88.87,
+                    "relWidth":  26.82,
+                    "relHeight":  6.47
+                },
+    "EFGHi":  {
+                  "map":  "map_2floor.jpg",
+                  "x":  343,
+                  "y":  620,
+                  "width":  50,
+                  "height":  108,
+                  "relX":  37.24,
+                  "relY":  80.21,
+                  "relWidth":  9.31,
+                  "relHeight":  13.91
+              },
+    "MNOP":  {
+                 "map":  "map_2floor.jpg",
+                 "x":  192,
+                 "y":  568,
+                 "width":  50,
+                 "height":  111,
+                 "relX":  10.61,
+                 "relY":  73.48,
+                 "relWidth":  9.31,
+                 "relHeight":  14.36
+             },
+    "RQTS":  {
+                 "map":  "map_2floor.jpg",
+                 "x":  450,
+                 "y":  190,
+                 "width":  144,
+                 "height":  50,
+                 "relX":  58.66,
+                 "relY":  24.58,
+                 "relWidth":  26.82,
+                 "relHeight":  6.47
+             },
+    "ZYXWV":  {
+                  "map":  "map_2floor.jpg",
+                  "x":  220,
+                  "y":  247,
+                  "width":  134,
+                  "height":  50,
+                  "relX":  14.34,
+                  "relY":  31.95,
+                  "relWidth":  24.95,
+                  "relHeight":  6.47
+              },
+    "AW AA AD AE":  {
+                        "map":  "map_2floor.jpg",
+                        "x":  450,
+                        "y":  272,
+                        "width":  144,
+                        "height":  49,
+                        "relX":  58.66,
+                        "relY":  35.19,
+                        "relWidth":  26.82,
+                        "relHeight":  6.34
+                    },
+    "U AX AV AY AZ":  {
+                          "map":  "map_2floor.jpg",
+                          "x":  219,
+                          "y":  353,
+                          "width":  134,
+                          "height":  50,
+                          "relX":  14.15,
+                          "relY":  45.67,
+                          "relWidth":  24.95,
+                          "relHeight":  6.47
+                      },
+    "AU AF AC AB":  {
+                        "map":  "map_2floor.jpg",
+                        "x":  453,
+                        "y":  435,
+                        "width":  139,
+                        "height":  52,
+                        "relX":  59.22,
+                        "relY":  56.27,
+                        "relWidth":  25.88,
+                        "relHeight":  6.73
+                    },
+    "Displays1":  {
+                      "map":  "map_2floor.jpg",
+                      "boxes":  [
+                                    {
+                                        "x":  399,
+                                        "y":  551,
+                                        "width":  98,
+                                        "height":  49,
+                                        "relX":  49.16,
+                                        "relY":  71.28,
+                                        "relWidth":  18.25,
+                                        "relHeight":  6.34,
+                                        "name":  "Chairs"
+                                    },
+                                    {
+                                        "x":  506,
+                                        "y":  551,
+                                        "width":  98,
+                                        "height":  49,
+                                        "relX":  69.09,
+                                        "relY":  71.28,
+                                        "relWidth":  18.25,
+                                        "relHeight":  6.34,
+                                        "name":  "Displays"
+                                    },
+                                    {
+                                        "x":  448,
+                                        "y":  494,
+                                        "width":  98,
+                                        "height":  49,
+                                        "relX":  58.29,
+                                        "relY":  63.91,
+                                        "relWidth":  18.25,
+                                        "relHeight":  6.34,
+                                        "name":  "Sofas"
+                                    },
+                                    {
+                                        "x":  480,
+                                        "y":  348,
+                                        "width":  104,
+                                        "height":  58,
+                                        "relX":  64.25,
+                                        "relY":  45.02,
+                                        "relWidth":  19.37,
+                                        "relHeight":  7.5,
+                                        "name":  "Displays"
+                                    },
+                                    {
+                                        "x":  449,
+                                        "y":  145,
+                                        "width":  143,
+                                        "height":  35,
+                                        "relX":  58.47,
+                                        "relY":  18.76,
+                                        "relWidth":  26.63,
+                                        "relHeight":  4.53,
+                                        "name":  "Displays"
+                                    },
+                                    {
+                                        "x":  217,
+                                        "y":  194,
+                                        "width":  143,
+                                        "height":  35,
+                                        "relX":  15.27,
+                                        "relY":  25.1,
+                                        "relWidth":  26.63,
+                                        "relHeight":  4.53,
+                                        "name":  "Displays"
+                                    },
+                                    {
+                                        "x":  214,
+                                        "y":  416,
+                                        "width":  143,
+                                        "height":  35,
+                                        "relX":  14.71,
+                                        "relY":  53.82,
+                                        "relWidth":  26.63,
+                                        "relHeight":  4.53,
+                                        "name":  "Displays"
+                                    }
+                                ]
+                  },
+    "AG AH Ai AJ AK":  {
+                           "map":  "map_1floor.jpg",
+                           "x":  675,
+                           "y":  360,
+                           "width":  112,
+                           "height":  50,
+                           "relX":  54.47,
+                           "relY":  46.51,
+                           "relWidth":  20.86,
+                           "relHeight":  6.47
+                       },
+    "AL AM AN AO AT":  {
+                           "map":  "map_1floor.jpg",
+                           "x":  547,
+                           "y":  363,
+                           "width":  112,
+                           "height":  50,
+                           "relX":  30.63,
+                           "relY":  46.90,
+                           "relWidth":  20.86,
+                           "relHeight":  6.47
+                       },
+    "AP AQ AR AS":  {
+                        "map":  "map_1floor.jpg",
+                        "x":  550,
+                        "y":  607,
+                        "width":  175,
+                        "height":  50,
+                        "relX":  31.19,
+                        "relY":  78.46,
+                        "relWidth":  32.59,
+                        "relHeight":  6.47
+                    },
+    "Displays2":  {
+                      "map":  "map_1floor.jpg",
+                      "x":  457,
+                      "y":  611,
+                      "width":  72,
+                      "height":  55,
+                      "relX":  13.87,
+                      "relY":  78.98,
+                      "relWidth":  13.41,
+                      "relHeight":  7.12
+                  }
 }

@@ -307,6 +307,17 @@
             z-index: 10;
         }
 
+        .map-container.edit-mode .map-area-box {
+            pointer-events: auto;
+            cursor: move;
+        }
+
+        .map-container.edit-mode .map-area-box.selected {
+            border-color: #ffd700;
+            background-color: rgba(255, 215, 0, 0.2);
+            z-index: 20;
+        }
+
         .map-area-box .area-label {
             color: #4a9eff;
             font-size: 12px;
@@ -316,6 +327,30 @@
             word-wrap: break-word;
             max-width: 100%;
         }
+
+        .map-area-box .area-label,
+        .map-area-box .area-info-text {
+            pointer-events: none;
+        }
+
+        .map-box-resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ffd700;
+            border: 1px solid #1a1a1a;
+            display: none;
+            z-index: 25;
+        }
+
+        .map-container.edit-mode .map-area-box.selected .map-box-resize-handle {
+            display: block;
+        }
+
+        .map-box-resize-handle.nw { top: -6px; left: -6px; cursor: nwse-resize; }
+        .map-box-resize-handle.ne { top: -6px; right: -6px; cursor: nesw-resize; }
+        .map-box-resize-handle.sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+        .map-box-resize-handle.se { bottom: -6px; right: -6px; cursor: nwse-resize; }
 
         /* Area 11 special layout - two rows */
         .map-area-box.area-11 {
@@ -423,6 +458,39 @@
 
         .coordinates-display button:hover {
             background-color: #4d4d4d;
+        }
+
+        .edit-tools {
+            margin-top: 8px;
+            display: none;
+            gap: 8px;
+            flex-direction: column;
+        }
+
+        .edit-tools button {
+            padding: 8px 12px;
+            background-color: #3d3d3d;
+            border: 1px solid #505050;
+            border-radius: 4px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 12px;
+            width: 100%;
+        }
+
+        .edit-tools button:hover {
+            background-color: #4d4d4d;
+        }
+
+        .edit-tools button.active {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        .edit-tools .edit-status {
+            color: #b0b0b0;
+            font-size: 11px;
+            line-height: 1.35;
         }
 
         /* Mobile view */
@@ -542,6 +610,13 @@
                 <button id="openFileBtn" style="padding: 8px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px; width: 100%; margin-bottom: 8px;">Open export.json</button>
                 <input type="file" id="coordinatesFileInput" accept=".json" style="display: none;" />
                 <button id="openCoordinatesBtn" style="padding: 8px 12px; background-color: #3d3d3d; border: 1px solid #505050; border-radius: 4px; color: #e0e0e0; cursor: pointer; font-size: 12px; width: 100%;">Open coordinates.json</button>
+                <div class="edit-tools" id="editTools">
+                    <button id="toggleEditModeBtn">Edit mode: OFF</button>
+                    <button id="addBoxToSelectedBtn">Add box to selected area</button>
+                    <button id="deleteSelectedBoxBtn">Delete selected box</button>
+                    <button id="saveActiveFloorBtn">Save active floor JSON</button>
+                    <div class="edit-status" id="editStatus">Local edit tools. GitHub Pages peal peidetud.</div>
+                </div>
             </div>
         </div>
         <div class="content-area">
@@ -592,6 +667,10 @@
         let uniqueColorDescs = []; // All unique colorDesc values from entire JSON
         let selectedColorDescs = new Set(); // Selected colorDesc filters
         let currentMap = 'map_2floor.jpg'; // Current map image (default: floor2)
+        let editModeEnabled = false;
+        let selectedEditableCoordinateKey = '';
+        let selectedEditableBoxIndex = 0;
+        let activeMapEditInteraction = null;
         
         // Hardcoded: Area9, Area10, Area11 are on floor1 (map_1floor.jpg)
         // Displays2 is also on floor1
@@ -602,6 +681,445 @@
         // Get map for area
         function getMapForArea(area) {
             return isFloor1Area(area) ? 'map_1floor.jpg' : 'map_2floor.jpg';
+        }
+
+        function isDisplayCoordinateKey(coordinateKey) {
+            return typeof coordinateKey === 'string' && coordinateKey.startsWith('Displays');
+        }
+
+        function indexToAlphaLabel(index) {
+            let value = Math.max(0, index);
+            let label = '';
+            do {
+                label = String.fromCharCode(65 + (value % 26)) + label;
+                value = Math.floor(value / 26) - 1;
+            } while (value >= 0);
+            return label;
+        }
+
+        function getDefaultDisplayBoxName(index) {
+            return `displays_${indexToAlphaLabel(index)}`;
+        }
+
+        function setEditStatus(message) {
+            const statusEl = document.getElementById('editStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+        }
+
+        function refreshEditModeUI() {
+            const toggleBtn = document.getElementById('toggleEditModeBtn');
+            if (toggleBtn) {
+                toggleBtn.textContent = `Edit mode: ${editModeEnabled ? 'ON' : 'OFF'}`;
+                toggleBtn.classList.toggle('active', editModeEnabled);
+            }
+
+            if (mapContainer) {
+                mapContainer.classList.toggle('edit-mode', isLocal() && editModeEnabled);
+            }
+        }
+
+        function selectEditableMapBox(box) {
+            const allBoxes = mapContainer ? mapContainer.querySelectorAll('.map-area-box') : [];
+            allBoxes.forEach(item => item.classList.remove('selected'));
+
+            if (!box) {
+                selectedEditableCoordinateKey = '';
+                selectedEditableBoxIndex = 0;
+                setEditStatus(editModeEnabled ? 'Edit mode active. Select a visible area box.' : 'Local edit tools. GitHub Pages peal peidetud.');
+                return;
+            }
+
+            box.classList.add('selected');
+            selectedEditableCoordinateKey = box.dataset.coordinateKey || '';
+            selectedEditableBoxIndex = parseInt(box.dataset.boxIndex || '0', 10) || 0;
+            const label = box.dataset.coordinateKey || box.dataset.areaName || 'unknown';
+            const boxNo = selectedEditableBoxIndex + 1;
+            setEditStatus(`Selected: ${label} #${boxNo} (${currentMap === 'map_1floor.jpg' ? '1st floor' : '2nd floor'})`);
+        }
+
+        function getCoordinateBoxes(entry) {
+            if (!entry) return [];
+            if (Array.isArray(entry.boxes) && entry.boxes.length > 0) {
+                return entry.boxes;
+            }
+
+            const hasSingleBox = ['x', 'y', 'width', 'height', 'relX', 'relY', 'relWidth', 'relHeight']
+                .every(prop => typeof entry[prop] !== 'undefined');
+
+            return hasSingleBox ? [entry] : [];
+        }
+
+        function ensureDisplayBoxNames(entry, coordinateKey) {
+            if (!entry || !isDisplayCoordinateKey(coordinateKey) || !Array.isArray(entry.boxes)) {
+                return;
+            }
+
+            entry.boxes.forEach((box, index) => {
+                if (!box || typeof box !== 'object') return;
+                if (!box.name || String(box.name).trim() === '') {
+                    box.name = getDefaultDisplayBoxName(index);
+                }
+            });
+        }
+
+        function convertEntryToMultiBox(entry) {
+            if (!entry) return null;
+            if (Array.isArray(entry.boxes)) {
+                return entry.boxes;
+            }
+
+            const boxes = [];
+            const singleBoxes = getCoordinateBoxes(entry);
+            if (singleBoxes.length > 0) {
+                const source = singleBoxes[0];
+                boxes.push({
+                    x: source.x,
+                    y: source.y,
+                    width: source.width,
+                    height: source.height,
+                    relX: source.relX,
+                    relY: source.relY,
+                    relWidth: source.relWidth,
+                    relHeight: source.relHeight
+                });
+            }
+
+            entry.boxes = boxes;
+            delete entry.x;
+            delete entry.y;
+            delete entry.width;
+            delete entry.height;
+            delete entry.relX;
+            delete entry.relY;
+            delete entry.relWidth;
+            delete entry.relHeight;
+            return entry.boxes;
+        }
+
+        function getImageBoundsInContainer() {
+            if (!mapImage || !mapContainer) return null;
+
+            const imgRect = mapImage.getBoundingClientRect();
+            const containerRect = mapContainer.getBoundingClientRect();
+            if (!imgRect.width || !imgRect.height) return null;
+
+            return {
+                imgRect,
+                containerRect,
+                imgLeft: imgRect.left - containerRect.left,
+                imgTop: imgRect.top - containerRect.top
+            };
+        }
+
+        function syncCoordinatesDataFromMapBox(box) {
+            const coordinateKey = box?.dataset?.coordinateKey;
+            if (!coordinateKey || !coordinatesData[coordinateKey]) return;
+            const boxIndex = parseInt(box?.dataset?.boxIndex || '0', 10) || 0;
+
+            const bounds = getImageBoundsInContainer();
+            if (!bounds) return;
+
+            const { imgRect, containerRect, imgLeft, imgTop } = bounds;
+            const boxRect = box.getBoundingClientRect();
+
+            const absX = Math.round(boxRect.left - containerRect.left);
+            const absY = Math.round(boxRect.top - containerRect.top);
+            const absWidth = Math.round(boxRect.width);
+            const absHeight = Math.round(boxRect.height);
+
+            const relX = Number((((absX - imgLeft) / imgRect.width) * 100).toFixed(2));
+            const relY = Number((((absY - imgTop) / imgRect.height) * 100).toFixed(2));
+            const relWidth = Number(((absWidth / imgRect.width) * 100).toFixed(2));
+            const relHeight = Number(((absHeight / imgRect.height) * 100).toFixed(2));
+
+            const entry = coordinatesData[coordinateKey];
+            let target = entry;
+
+            if (Array.isArray(entry.boxes)) {
+                if (!entry.boxes[boxIndex]) {
+                    entry.boxes[boxIndex] = {};
+                }
+                target = entry.boxes[boxIndex];
+            }
+
+            target.x = absX;
+            target.y = absY;
+            target.width = absWidth;
+            target.height = absHeight;
+            target.relX = relX;
+            target.relY = relY;
+            target.relWidth = relWidth;
+            target.relHeight = relHeight;
+
+            setEditStatus(`${coordinateKey} #${boxIndex + 1}: X ${absX}, Y ${absY}, W ${absWidth}, H ${absHeight}`);
+        }
+
+        function startMapBoxEdit(e, box) {
+            if (!isLocal() || !editModeEnabled || !box) return;
+
+            const handle = e.target.closest('.map-box-resize-handle');
+            const bounds = getImageBoundsInContainer();
+            if (!bounds) return;
+
+            const { containerRect } = bounds;
+            const boxRect = box.getBoundingClientRect();
+
+            selectEditableMapBox(box);
+
+            activeMapEditInteraction = {
+                mode: handle ? 'resize' : 'drag',
+                handle: handle ? handle.dataset.handle : '',
+                box,
+                startX: e.clientX,
+                startY: e.clientY,
+                startLeft: boxRect.left - containerRect.left,
+                startTop: boxRect.top - containerRect.top,
+                startWidth: boxRect.width,
+                startHeight: boxRect.height
+            };
+
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function onMapBoxEditMove(e) {
+            if (!activeMapEditInteraction || !isLocal() || !editModeEnabled) return;
+
+            const bounds = getImageBoundsInContainer();
+            if (!bounds) return;
+            const { imgRect, imgLeft, imgTop } = bounds;
+
+            const interaction = activeMapEditInteraction;
+            const box = interaction.box;
+            if (!box) return;
+
+            const deltaX = e.clientX - interaction.startX;
+            const deltaY = e.clientY - interaction.startY;
+
+            let newLeft = interaction.startLeft;
+            let newTop = interaction.startTop;
+            let newWidth = interaction.startWidth;
+            let newHeight = interaction.startHeight;
+
+            const minSize = 30;
+            const maxRight = imgLeft + imgRect.width;
+            const maxBottom = imgTop + imgRect.height;
+
+            if (interaction.mode === 'drag') {
+                newLeft = interaction.startLeft + deltaX;
+                newTop = interaction.startTop + deltaY;
+
+                newLeft = Math.max(imgLeft, Math.min(newLeft, maxRight - interaction.startWidth));
+                newTop = Math.max(imgTop, Math.min(newTop, maxBottom - interaction.startHeight));
+            } else {
+                const handle = interaction.handle;
+
+                if (handle === 'se') {
+                    newWidth = interaction.startWidth + deltaX;
+                    newHeight = interaction.startHeight + deltaY;
+                } else if (handle === 'sw') {
+                    newWidth = interaction.startWidth - deltaX;
+                    newHeight = interaction.startHeight + deltaY;
+                    newLeft = interaction.startLeft + (interaction.startWidth - newWidth);
+                } else if (handle === 'ne') {
+                    newWidth = interaction.startWidth + deltaX;
+                    newHeight = interaction.startHeight - deltaY;
+                    newTop = interaction.startTop + (interaction.startHeight - newHeight);
+                } else if (handle === 'nw') {
+                    newWidth = interaction.startWidth - deltaX;
+                    newHeight = interaction.startHeight - deltaY;
+                    newLeft = interaction.startLeft + (interaction.startWidth - newWidth);
+                    newTop = interaction.startTop + (interaction.startHeight - newHeight);
+                }
+
+                if (newWidth < minSize) {
+                    if (handle === 'sw' || handle === 'nw') {
+                        newLeft -= (minSize - newWidth);
+                    }
+                    newWidth = minSize;
+                }
+                if (newHeight < minSize) {
+                    if (handle === 'ne' || handle === 'nw') {
+                        newTop -= (minSize - newHeight);
+                    }
+                    newHeight = minSize;
+                }
+
+                if (newLeft < imgLeft) {
+                    newWidth -= (imgLeft - newLeft);
+                    newLeft = imgLeft;
+                }
+                if (newTop < imgTop) {
+                    newHeight -= (imgTop - newTop);
+                    newTop = imgTop;
+                }
+
+                if (newLeft + newWidth > maxRight) {
+                    newWidth = maxRight - newLeft;
+                }
+                if (newTop + newHeight > maxBottom) {
+                    newHeight = maxBottom - newTop;
+                }
+
+                newWidth = Math.max(minSize, newWidth);
+                newHeight = Math.max(minSize, newHeight);
+            }
+
+            box.style.left = `${newLeft}px`;
+            box.style.top = `${newTop}px`;
+            box.style.width = `${newWidth}px`;
+            box.style.height = `${newHeight}px`;
+
+            syncCoordinatesDataFromMapBox(box);
+            e.preventDefault();
+        }
+
+        function stopMapBoxEdit() {
+            if (!activeMapEditInteraction) return;
+            activeMapEditInteraction = null;
+            document.body.style.userSelect = '';
+        }
+
+        function toggleEditMode() {
+            if (!isLocal()) return;
+
+            editModeEnabled = !editModeEnabled;
+            if (!editModeEnabled) {
+                selectEditableMapBox(null);
+            }
+            refreshEditModeUI();
+            updateAreaBoxes();
+        }
+
+        function addBoxToSelectedArea() {
+            if (!isLocal()) return;
+            if (!editModeEnabled) {
+                alert('Lülita Edit mode sisse.');
+                return;
+            }
+            if (!selectedEditableCoordinateKey) {
+                alert('Vali kõigepealt kaartil kast.');
+                return;
+            }
+
+            const entry = coordinatesData[selectedEditableCoordinateKey];
+            if (!entry) {
+                alert('Valitud ala koordinaate ei leitud.');
+                return;
+            }
+            if (entry.map !== currentMap) {
+                alert('Valitud ala ei kuulu aktiivsele korrusele.');
+                return;
+            }
+
+            const boxes = convertEntryToMultiBox(entry);
+            if (!boxes) return;
+
+            const source = boxes[selectedEditableBoxIndex] || boxes[0];
+            if (!source) {
+                alert('Valitud alal puudub alus-kast kopeerimiseks.');
+                return;
+            }
+
+            const newBox = {
+                x: Math.round((source.x ?? 0) + 12),
+                y: Math.round((source.y ?? 0) + 12),
+                width: Math.round(source.width ?? 80),
+                height: Math.round(source.height ?? 50),
+                relX: Number(source.relX ?? 0),
+                relY: Number(source.relY ?? 0),
+                relWidth: Number(source.relWidth ?? 0),
+                relHeight: Number(source.relHeight ?? 0)
+            };
+            if (isDisplayCoordinateKey(selectedEditableCoordinateKey)) {
+                newBox.name = getDefaultDisplayBoxName(boxes.length);
+            }
+
+            const bounds = getImageBoundsInContainer();
+            if (bounds) {
+                const { imgRect, imgLeft, imgTop } = bounds;
+                newBox.relX = Number((((newBox.x - imgLeft) / imgRect.width) * 100).toFixed(2));
+                newBox.relY = Number((((newBox.y - imgTop) / imgRect.height) * 100).toFixed(2));
+                newBox.relWidth = Number(((newBox.width / imgRect.width) * 100).toFixed(2));
+                newBox.relHeight = Number(((newBox.height / imgRect.height) * 100).toFixed(2));
+            }
+
+            boxes.push(newBox);
+            selectedEditableBoxIndex = boxes.length - 1;
+            updateAreaBoxes();
+            setEditStatus(`Added new box to ${selectedEditableCoordinateKey} (now ${boxes.length} boxes).`);
+        }
+
+        function deleteSelectedBox() {
+            if (!isLocal()) return;
+            if (!editModeEnabled) {
+                alert('Lülita Edit mode sisse.');
+                return;
+            }
+            if (!selectedEditableCoordinateKey) {
+                alert('Vali kustutatav kast.');
+                return;
+            }
+
+            const entry = coordinatesData[selectedEditableCoordinateKey];
+            if (!entry) return;
+
+            if (!Array.isArray(entry.boxes)) {
+                alert('Sellel alal on hetkel ainult üks kast (multi-box pole veel kasutusel).');
+                return;
+            }
+
+            if (entry.boxes.length <= 1) {
+                alert('Viimast kasti ei kustuta.');
+                return;
+            }
+
+            const removeIndex = Math.min(selectedEditableBoxIndex, entry.boxes.length - 1);
+            entry.boxes.splice(removeIndex, 1);
+            selectedEditableBoxIndex = Math.max(0, removeIndex - 1);
+            updateAreaBoxes();
+            setEditStatus(`Removed box from ${selectedEditableCoordinateKey} (remaining ${entry.boxes.length}).`);
+        }
+
+        function downloadTextFile(filename, text) {
+            const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = filename;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 0);
+        }
+
+        function saveActiveFloorCoordinates() {
+            if (!isLocal()) {
+                return;
+            }
+
+            const coordinateKeys = Object.keys(coordinatesData || {});
+            if (coordinateKeys.length === 0) {
+                alert('Lae enne coordinates.json.');
+                return;
+            }
+
+            const activeFloor = currentMap || 'map_2floor.jpg';
+            const floorData = {};
+            coordinateKeys.forEach(key => {
+                const entry = coordinatesData[key];
+                ensureDisplayBoxNames(entry, key);
+                if (entry?.map === activeFloor) {
+                    floorData[key] = entry;
+                }
+            });
+
+            const floorLabel = activeFloor === 'map_1floor.jpg' ? '1floor' : '2floor';
+            downloadTextFile(`coordinates-${floorLabel}-edited.json`, JSON.stringify(floorData, null, 2));
+            setEditStatus(`Saved ${floorLabel} JSON (${Object.keys(floorData).length} entries).`);
         }
 
         // Update floor labels based on current map
@@ -1183,6 +1701,7 @@
 
         // Update area boxes on map based on active areas
         function updateAreaBoxes() {
+            stopMapBoxEdit();
             console.log('updateAreaBoxes called');
             console.log('mapImage:', mapImage);
             console.log('mapContainer:', mapContainer);
@@ -1330,6 +1849,7 @@
                     console.log('Available coordinate keys:', Object.keys(coordinatesData));
                     return;
                 }
+                ensureDisplayBoxNames(coords, coordinateKey);
                 
                 // Check if coordinates match current map
                 if (coords.map && coords.map !== currentMap) {
@@ -1337,56 +1857,85 @@
                     return;
                 }
                 
-                // Use relative coordinates to position box
-                const boxLeft = imgLeft + (imgRect.width * coords.relX / 100);
-                const boxTop = imgTop + (imgRect.height * coords.relY / 100);
-                const boxWidth = imgRect.width * coords.relWidth / 100;
-                const boxHeight = imgRect.height * coords.relHeight / 100;
-                
-                console.log(`Creating box for ${areaName}:`, {
-                    left: boxLeft,
-                    top: boxTop,
-                    width: boxWidth,
-                    height: boxHeight
-                });
-                
-                // Create box element
-                const box = document.createElement('div');
-                box.className = 'map-area-box';
-                // Add special class for Area 11
-                if (areaName === 'Area11') {
-                    box.classList.add('area-11');
+                const coordBoxes = getCoordinateBoxes(coords);
+                if (coordBoxes.length === 0) {
+                    console.warn(`No box coordinates found for coordinate key: ${coordinateKey}`);
+                    return;
                 }
-                box.style.left = boxLeft + 'px';
-                box.style.top = boxTop + 'px';
-                box.style.width = boxWidth + 'px';
-                box.style.height = boxHeight + 'px';
-                
-                // Add label (coordinate key with spaces, e.g., "J K L")
-                const label = document.createElement('div');
-                label.className = 'area-label';
-                // Convert coordinate key to spaced format: "JKL" -> "J K L"
-                const spacedKey = coordinateKey.split('').join(' ');
-                label.textContent = spacedKey;
-                box.appendChild(label);
-                
-                // For Area 11, add additional info text below the label
-                if (areaName === 'Area11') {
-                    const infoText = document.createElement('div');
-                    infoText.className = 'area-info-text';
-                    infoText.textContent = 'Ground floor';
-                    box.appendChild(infoText);
-                }
-                
-                mapContainer.appendChild(box);
-                console.log(`Box added for ${areaName} at position:`, {
-                    left: box.style.left,
-                    top: box.style.top,
-                    width: box.style.width,
-                    height: box.style.height
+
+                coordBoxes.forEach((coordBox, boxIndex) => {
+                    // Use relative coordinates to position box
+                    const boxLeft = imgLeft + (imgRect.width * coordBox.relX / 100);
+                    const boxTop = imgTop + (imgRect.height * coordBox.relY / 100);
+                    const boxWidth = imgRect.width * coordBox.relWidth / 100;
+                    const boxHeight = imgRect.height * coordBox.relHeight / 100;
+                    
+                    console.log(`Creating box for ${areaName} (${coordinateKey} #${boxIndex + 1}):`, {
+                        left: boxLeft,
+                        top: boxTop,
+                        width: boxWidth,
+                        height: boxHeight
+                    });
+                    
+                    // Create box element
+                    const box = document.createElement('div');
+                    box.className = 'map-area-box';
+                    box.dataset.coordinateKey = coordinateKey;
+                    box.dataset.areaName = areaName;
+                    box.dataset.boxIndex = String(boxIndex);
+                    // Add special class for Area 11
+                    if (areaName === 'Area11') {
+                        box.classList.add('area-11');
+                    }
+                    if (editModeEnabled && isLocal()) {
+                        box.classList.add('editable');
+                    }
+                    if (selectedEditableCoordinateKey === coordinateKey && selectedEditableBoxIndex === boxIndex) {
+                        box.classList.add('selected');
+                    }
+                    box.style.left = boxLeft + 'px';
+                    box.style.top = boxTop + 'px';
+                    box.style.width = boxWidth + 'px';
+                    box.style.height = boxHeight + 'px';
+                    
+                    // Add label (coordinate key with spaces, e.g., "J K L")
+                    const label = document.createElement('div');
+                    label.className = 'area-label';
+                    // Convert coordinate key to spaced format: "JKL" -> "J K L"
+                    const spacedKey = coordinateKey.includes(' ') ? coordinateKey : coordinateKey.split('').join(' ');
+                    const labelText = (isDisplayCoordinateKey(coordinateKey) && coordBox?.name)
+                        ? String(coordBox.name)
+                        : spacedKey;
+                    label.textContent = labelText;
+                    box.appendChild(label);
+                    
+                    // For Area 11, add additional info text below the label
+                    if (areaName === 'Area11') {
+                        const infoText = document.createElement('div');
+                        infoText.className = 'area-info-text';
+                        infoText.textContent = 'Ground floor';
+                        box.appendChild(infoText);
+                    }
+
+                    if (isLocal()) {
+                        ['nw', 'ne', 'sw', 'se'].forEach(handleName => {
+                            const handle = document.createElement('div');
+                            handle.className = `map-box-resize-handle ${handleName}`;
+                            handle.dataset.handle = handleName;
+                            box.appendChild(handle);
+                        });
+
+                        box.addEventListener('mousedown', (e) => startMapBoxEdit(e, box));
+                    }
+                    
+                    mapContainer.appendChild(box);
+                    console.log(`Box added for ${areaName} at position:`, {
+                        left: box.style.left,
+                        top: box.style.top,
+                        width: box.style.width,
+                        height: box.style.height
+                    });
                 });
-                console.log('Box element:', box);
-                console.log('Box parent:', box.parentElement);
             });
         }
 
@@ -1662,6 +2211,9 @@
                 if (openFileBtn) openFileBtn.style.display = 'block';
                 if (openCoordinatesBtn) openCoordinatesBtn.style.display = 'block';
                 if (fileContainer) fileContainer.style.display = 'block';
+                const editTools = document.getElementById('editTools');
+                if (editTools) editTools.style.display = 'flex';
+                setEditStatus('Local edit tools ready. Turn on Edit mode to move visible boxes.');
             } else {
                 // Hide buttons and container for GitHub Pages
                 if (openFileBtn) openFileBtn.style.display = 'none';
@@ -1676,6 +2228,8 @@
                     loadCoordinates();
                 });
             }
+
+            refreshEditModeUI();
         }
 
         // Initialize on page load
@@ -1725,6 +2279,29 @@
                     }
                 });
             }
+
+            const toggleEditModeBtn = document.getElementById('toggleEditModeBtn');
+            if (toggleEditModeBtn) {
+                toggleEditModeBtn.addEventListener('click', toggleEditMode);
+            }
+
+            const addBoxToSelectedBtn = document.getElementById('addBoxToSelectedBtn');
+            if (addBoxToSelectedBtn) {
+                addBoxToSelectedBtn.addEventListener('click', addBoxToSelectedArea);
+            }
+
+            const deleteSelectedBoxBtn = document.getElementById('deleteSelectedBoxBtn');
+            if (deleteSelectedBoxBtn) {
+                deleteSelectedBoxBtn.addEventListener('click', deleteSelectedBox);
+            }
+
+            const saveActiveFloorBtn = document.getElementById('saveActiveFloorBtn');
+            if (saveActiveFloorBtn) {
+                saveActiveFloorBtn.addEventListener('click', saveActiveFloorCoordinates);
+            }
+
+            document.addEventListener('mousemove', onMapBoxEditMove);
+            document.addEventListener('mouseup', stopMapBoxEdit);
 
             // Search functionality
             const keySearchInput = document.getElementById('keySearchInput');
@@ -2127,6 +2704,7 @@
 
         // Handle window resize to adjust box position
         function handleResize() {
+            stopMapBoxEdit();
             if (boxElement && mapImage) {
                 updateCoordinates();
             }
@@ -2162,5 +2740,3 @@
     </script>
 </body>
 </html>
-
-

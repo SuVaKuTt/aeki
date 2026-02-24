@@ -21,8 +21,8 @@
       "items": 489
     },
     "UVWXYZ": {
-      "columnsProcessed": 16,
-      "items": 651
+      "columnsProcessed": 21,
+      "items": 703
     },
     "A.ABCDE": {
       "columnsProcessed": 34,
@@ -43,13 +43,21 @@
     "A.PQRS": {
       "columnsProcessed": 32,
       "items": 530
+    },
+    "A.UVWX": {
+      "columnsProcessed": 38,
+      "items": 843
+    },
+    "A.YZ": {
+      "columnsProcessed": 44,
+      "items": 484
     }
   },
   "letters": {
     "A": {
-      "entries": 2835,
+      "entries": 4162,
       "totalQty": 3877,
-      "uniqueIds": 2023
+      "uniqueIds": 2807
     },
     "B": {
       "entries": 58,
@@ -152,9 +160,9 @@
       "uniqueIds": 111
     },
     "V": {
-      "entries": 110,
+      "entries": 162,
       "totalQty": 0,
-      "uniqueIds": 102
+      "uniqueIds": 147
     },
     "W": {
       "entries": 60,
