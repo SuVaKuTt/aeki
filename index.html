@@ -42,6 +42,28 @@
             color: #7ab8ff;
         }
 
+        .top-links {
+            width: min(100%, 1100px);
+            margin: 0 auto 12px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-links a {
+            color: #4a9eff;
+            text-decoration: none;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .top-links a:hover {
+            color: #7ab8ff;
+            text-decoration: underline;
+        }
+
         .file-container {
             padding: 10px 20px;
             border-bottom: 1px solid #404040;
@@ -2752,5 +2774,9 @@
             }, 100);
         });
     </script>
+    <div class="top-links">
+        <a href="https://docs.google.com/spreadsheets/d/1crM63Wx_jaSfaRT_M96ARXVPN92WeZEI/edit?usp=drive_link&amp;ouid=118186260651226579492&amp;rtpof=true&amp;sd=true" target="_blank" rel="noopener noreferrer">Open Excel</a>
+        <a href="export.json" download>Download json</a>
+    </div>
 </body>
 </html>
