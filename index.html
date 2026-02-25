@@ -64,6 +64,90 @@
             text-decoration: underline;
         }
 
+        .help-fab {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1200;
+            border: 1px solid #505050;
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .help-fab:hover {
+            background: #3b3b3b;
+            border-color: #6b6b6b;
+        }
+
+        .help-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.62);
+            z-index: 1300;
+            padding: 16px;
+        }
+
+        .help-modal.open {
+            display: flex;
+        }
+
+        .help-modal-card {
+            width: min(100%, 560px);
+            background: #252525;
+            border: 1px solid #404040;
+            border-radius: 10px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+            padding: 16px 16px 14px;
+        }
+
+        .help-modal-card h2 {
+            margin: 0 0 10px;
+            color: #ffffff;
+            font-size: 18px;
+        }
+
+        .help-modal-card p {
+            margin: 0 0 10px;
+            color: #d0d0d0;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .help-modal-card ul {
+            margin: 0 0 12px 18px;
+            color: #d0d0d0;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .help-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .help-modal-btn {
+            padding: 8px 12px;
+            border: 1px solid #505050;
+            border-radius: 7px;
+            background: #3d3d3d;
+            color: #e0e0e0;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .help-modal-btn:hover {
+            background: #4d4d4d;
+        }
+
         .file-container {
             padding: 10px 20px;
             border-bottom: 1px solid #404040;
@@ -638,6 +722,23 @@
     </style>
 </head>
 <body>
+    <button id="helpButton" class="help-fab" type="button">Help</button>
+    <div id="helpModal" class="help-modal" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+        <div class="help-modal-card">
+            <h2 id="helpModalTitle">Quick Guide</h2>
+            <p>Use this page for overview and location checks in the warehouse.</p>
+            <ul>
+                <li>Use area and category filters (for example: <strong>Storage</strong>, <strong>Lighting</strong>) to see zones.</li>
+                <li>Search by product code (for example: <code>805.481.85</code>) to find where the item is located.</li>
+                <li>Search by pallet key (for example: <code>AX3</code>) to see what items are on that pallet.</li>
+                <li>Open <strong>detail map</strong> for fast mobile code lookup and copy-ready results.</li>
+            </ul>
+            <div class="help-modal-actions">
+                <a class="help-modal-btn" href="mobile-map/index.html">Open detail map</a>
+                <button id="helpCloseButton" class="help-modal-btn" type="button">Close</button>
+            </div>
+        </div>
+    </div>
     <h1>StockFinder <a class="title-detail-link" href="mobile-map/index.html">detail map</a></h1>
     <div class="main-container">
         <div class="sidebar" id="sidebar">
@@ -2773,6 +2874,32 @@
                 }
             }, 100);
         });
+
+        const helpButton = document.getElementById('helpButton');
+        const helpModal = document.getElementById('helpModal');
+        const helpCloseButton = document.getElementById('helpCloseButton');
+
+        if (helpButton && helpModal && helpCloseButton) {
+            helpButton.addEventListener('click', function () {
+                helpModal.classList.add('open');
+            });
+
+            helpCloseButton.addEventListener('click', function () {
+                helpModal.classList.remove('open');
+            });
+
+            helpModal.addEventListener('click', function (e) {
+                if (e.target === helpModal) {
+                    helpModal.classList.remove('open');
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    helpModal.classList.remove('open');
+                }
+            });
+        }
     </script>
     <div class="top-links">
         <a href="https://docs.google.com/spreadsheets/d/1crM63Wx_jaSfaRT_M96ARXVPN92WeZEI/edit?usp=drive_link&amp;ouid=118186260651226579492&amp;rtpof=true&amp;sd=true" target="_blank" rel="noopener noreferrer">Open Excel</a>
