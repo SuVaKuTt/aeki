@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockFinder Map</title>
+    <title>StockFinder</title>
     <style>
         * {
             margin: 0;
@@ -26,6 +26,20 @@
             text-align: center;
             padding: 20px 20px 0;
             font-size: 1.2em; /* Väiksem kui vaikimisi h1 suurus */
+        }
+
+        .title-detail-link {
+            color: #4a9eff;
+            font-size: 0.85em;
+            font-weight: 500;
+            text-decoration: none;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        .title-detail-link:hover {
+            text-decoration: underline;
+            color: #7ab8ff;
         }
 
         .file-container {
@@ -602,7 +616,7 @@
     </style>
 </head>
 <body>
-    <h1>StockFinder Map</h1>
+    <h1>StockFinder <a class="title-detail-link" href="mobile-map/index.html">detail map</a></h1>
     <div class="main-container">
         <div class="sidebar" id="sidebar">
             <div class="file-container">

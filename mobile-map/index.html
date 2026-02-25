@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Aeki Kaart (mobiil)</title>
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --ink: #e0e0e0;
+      --muted: #b3b3b3;
+      --card: #252525;
+      --line: #404040;
+      --accent: #4a9eff;
+      --accent-2: #7ab8ff;
+      --marker-bg: rgba(74, 158, 255, 0.9);
+      --marker-text: #ffffff;
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .page {
+      width: min(100%, 900px);
+      margin: 0 auto;
+      padding: 14px 12px 28px;
+    }
+
+    .floor-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .floor-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #2d2d2d;
+    }
+
+    .floor-header h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .floor-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .map-wrap {
+      padding: 10px;
+    }
+
+    .search-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin-top: 10px;
+      padding: 12px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 0;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #2d2d2d;
+      color: var(--ink);
+      font-size: 13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+    }
+
+    .search-button {
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid #505050;
+      background: #3d3d3d;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .search-button:hover {
+      background: #4a4a4a;
+    }
+
+    .search-help {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .search-output {
+      margin-top: 10px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      white-space: pre-line;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--ink);
+      min-height: 22px;
+    }
+
+    .search-output.error {
+      color: #ff9b9b;
+    }
+
+    .search-actions {
+      margin-top: 8px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .search-load-row {
+      margin-top: 8px;
+      display: none;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .map-stage {
+      position: relative;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1f1f1f;
+      aspect-ratio: calc(var(--view-w) / var(--view-h));
+    }
+
+    .map-canvas {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: calc((-100% * var(--crop-left)) / var(--visible-frac));
+      width: calc(100% / var(--visible-frac));
+    }
+
+    .map-stage img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .marker {
+      position: absolute;
+      transform: translate(0, 0);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 999px;
+      background: var(--marker-bg);
+      color: var(--marker-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      pointer-events: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      min-width: 18px;
+      min-height: 11px;
+    }
+
+    .marker.is-highlighted {
+      background: rgba(128, 12, 18, 0.92);
+      border-color: rgba(255, 170, 170, 0.85);
+      box-shadow: 0 0 0 1px rgba(255, 120, 120, 0.22), 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+
+    .marker span {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      font-weight: 700;
+      font-size: clamp(7px, 1.8vw, 12px);
+      line-height: 1;
+      letter-spacing: 0.02em;
+      padding-top: 1px;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+    }
+
+    .map-callout {
+      position: absolute;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .map-callout-text {
+      background: var(--marker-bg);
+      color: #e7eef3;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: clamp(8px, 2.1vw, 13px);
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.14);
+    }
+
+    .map-callout-arrow {
+      background: var(--marker-bg);
+      color: #e7eef3;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 999px;
+      padding: 2px 5px 3px;
+      font-weight: 800;
+      font-size: clamp(8px, 2vw, 12px);
+      line-height: 1;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.14);
+    }
+
+    @media (min-width: 700px) {
+      .page { padding-top: 18px; }
+      .hero h1 { font-size: 24px; }
+      .floor-header h2 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+      <section class="floor-card" id="floor-1">
+        <header class="floor-header">
+          <h2>1st Floor</h2>
+          <p>14 markers</p>
+        </header>
+        <div class="map-wrap">
+          <div class="map-stage" style="--img-w: 796; --img-h: 515; --view-w: 796; --view-h: 515; --crop-left: 0; --crop-right: 0; --visible-frac: 1;">
+            <div class="map-canvas">
+              <img src="assets/image2.png" alt="1st Floor map" loading="lazy" />
+              <div class="overlay" aria-hidden="true">
+          <div class="map-callout" style="left: 56.0589%; top: 82.8417%;">
+            <span class="map-callout-arrow" aria-hidden="true">&lt;-</span>
+            <span class="map-callout-text">Ground floor</span>
+            
+          </div>
+          <button class="marker" type="button" style="left: 32.3893%; top: 13.0945%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AT">
+            <span>AT</span>
+          </button>
+          <button class="marker" type="button" style="left: 49.8725%; top: 13.2888%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AK">
+            <span>AK</span>
+          </button>
+          <button class="marker" type="button" style="left: 32.4909%; top: 18.845%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AO">
+            <span>AO</span>
+          </button>
+          <button class="marker" type="button" style="left: 49.9742%; top: 19.0392%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AJ">
+            <span>AJ</span>
+          </button>
+          <button class="marker" type="button" style="left: 32.4419%; top: 24.6979%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AN">
+            <span>AN</span>
+          </button>
+          <button class="marker" type="button" style="left: 49.9251%; top: 24.8921%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht Ai">
+            <span>Ai</span>
+          </button>
+          <button class="marker" type="button" style="left: 32.4524%; top: 30.5239%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AM">
+            <span>AM</span>
+          </button>
+          <button class="marker" type="button" style="left: 49.9357%; top: 30.7181%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AH">
+            <span>AH</span>
+          </button>
+          <button class="marker" type="button" style="left: 32.5155%; top: 36.3013%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AL">
+            <span>AL</span>
+          </button>
+          <button class="marker" type="button" style="left: 49.9988%; top: 36.4956%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AG">
+            <span>AG</span>
+          </button>
+          <button class="marker" type="button" style="left: 43.9466%; top: 74.0947%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AS">
+            <span>AS</span>
+          </button>
+          <button class="marker" type="button" style="left: 43.8975%; top: 79.9476%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AQ">
+            <span>AQ</span>
+          </button>
+          <button class="marker" type="button" style="left: 43.908%; top: 85.7736%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AP">
+            <span>AP</span>
+          </button>
+          <button class="marker" type="button" style="left: 43.9711%; top: 91.551%; width: 8.5878%; height: 5.1379%;" aria-label="Asukoht AR">
+            <span>AR</span>
+          </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="floor-card" id="floor-2">
+        <header class="floor-header">
+          <h2>2nd Floor</h2>
+          <p>33 markers</p>
+        </header>
+        <div class="map-wrap">
+          <div class="map-stage" style="--img-w: 1317; --img-h: 1039; --view-w: 878; --view-h: 1039; --crop-left: 0.333333; --crop-right: 0; --visible-frac: 0.666667;">
+            <div class="map-canvas">
+              <img src="assets/image1.png" alt="2nd Floor map" loading="lazy" />
+              <div class="overlay" aria-hidden="true">
+
+          <button class="marker" type="button" style="left: 77.4784%; top: 23.3427%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht R">
+            <span>R</span>
+          </button>
+          <button class="marker" type="button" style="left: 83.056%; top: 23.3427%; width: 5.1386%; height: 2.5467%;" aria-label="Asukoht Q">
+            <span>Q</span>
+          </button>
+          <button class="marker" type="button" style="left: 80.7917%; top: 26.7839%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht T">
+            <span>T</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.8162%; top: 28.5406%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht Z">
+            <span>Z</span>
+          </button>
+          <button class="marker" type="button" style="left: 77.8878%; top: 30.2251%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht S">
+            <span>S</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.49%; top: 31.5246%; width: 5.77%; height: 2.5467%;" aria-label="Asukoht Y+X">
+            <span>Y+X</span>
+          </button>
+          <button class="marker" type="button" style="left: 80.4271%; top: 33.2573%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AW">
+            <span>AW</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.7778%; top: 34.3643%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht W">
+            <span>W</span>
+          </button>
+          <button class="marker" type="button" style="left: 77.568%; top: 36.506%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AA">
+            <span>AA</span>
+          </button>
+          <button class="marker" type="button" style="left: 83.2543%; top: 36.6263%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AD">
+            <span>AD</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.7821%; top: 37.2039%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht V">
+            <span>V</span>
+          </button>
+          <button class="marker" type="button" style="left: 83.7596%; top: 39.7307%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AE">
+            <span>AE</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.765%; top: 40.0676%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht U">
+            <span>U</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.781%; top: 42.9433%; width: 5.241%; height: 2.5467%;" aria-label="Asukoht AX">
+            <span>AX</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.797%; top: 45.819%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AV">
+            <span>AV</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.8034%; top: 48.7068%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AY">
+            <span>AY</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.8418%; top: 51.5705%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AZ">
+            <span>AZ</span>
+          </button>
+          <button class="marker" type="button" style="left: 77.1266%; top: 54.5304%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AU">
+            <span>AU</span>
+          </button>
+          <button class="marker" type="button" style="left: 85.589%; top: 54.7229%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AF">
+            <span>AF</span>
+          </button>
+          <button class="marker" type="button" style="left: 77.1266%; top: 57.8272%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AU">
+            <span>AU</span>
+          </button>
+          <button class="marker" type="button" style="left: 88.8191%; top: 57.9235%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AC">
+            <span>AC</span>
+          </button>
+          <button class="marker" type="button" style="left: 77.165%; top: 61.1%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AU">
+            <span>AU</span>
+          </button>
+          <button class="marker" type="button" style="left: 83.0368%; top: 61.1%; width: 5.1386%; height: 2.5467%;" aria-label="Asukoht AC">
+            <span>AC</span>
+          </button>
+          <button class="marker" type="button" style="left: 88.9086%; top: 61.1%; width: 5.1898%; height: 2.5467%;" aria-label="Asukoht AB">
+            <span>AB</span>
+          </button>
+          <button class="marker" type="button" style="left: 49.5842%; top: 83.1753%; width: 7.5221%; height: 2.5467%;" aria-label="Asukoht MNOP">
+            <span>MNOP</span>
+          </button>
+          <button class="marker" type="button" style="left: 63.7584%; top: 83.1753%; width: 8.0338%; height: 2.5467%;" aria-label="Asukoht iHGFE">
+            <span>iHGFE</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.5731%; top: 86.4%; width: 5.1898%; height: 1.8191%;" aria-label="Asukoht L">
+            <span>L</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.5774%; top: 88.4053%; width: 5.1898%; height: 1.8191%;" aria-label="Asukoht K">
+            <span>K</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.6115%; top: 90.4348%; width: 5.1898%; height: 1.8191%;" aria-label="Asukoht J">
+            <span>J</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.6222%; top: 92.4509%; width: 5.1898%; height: 1.8191%;" aria-label="Asukoht D">
+            <span>D</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.6435%; top: 94.4536%; width: 5.1898%; height: 1.8191%;" aria-label="Asukoht C">
+            <span>C</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.6499%; top: 96.4429%; width: 5.1898%; height: 1.8191%;" aria-label="Asukoht B">
+            <span>B</span>
+          </button>
+          <button class="marker" type="button" style="left: 57.6883%; top: 98.4082%; width: 5.1898%; height: 1.8191%;" aria-label="Asukoht A">
+            <span>A</span>
+          </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="search-card" aria-label="Tootekoodi otsing">
+        <div class="search-row">
+          <input id="productSearchInput" class="search-input" type="text" inputmode="decimal" enterkeyhint="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="e.g. 805.481.85 or 805.481.85, 205.103.93" />
+          <button id="productSearchBtn" class="search-button" type="button">Search</button>
+        </div>
+        <p class="search-help">For multiple codes, separate with commas. Output: code: a1,ab12</p>
+        <div id="productSearchOutput" class="search-output"></div>
+        <div class="search-actions">
+          <button id="copySearchOutputBtn" class="search-button" type="button">Copy</button>
+        </div>
+        <div class="search-load-row" id="loadExportRow">
+          <input type="file" id="exportFileInputMobile" accept=".json" style="display: none;" />
+          <button id="openExportBtnMobile" class="search-button" type="button">Open export.json</button>
+          <span class="search-help">Use this if automatic loading fails.</span>
+        </div>
+      </section>
+
+  </main>
+  <script>
+    (function () {
+      let exportData = null;
+      const inputEl = document.getElementById("productSearchInput");
+      const buttonEl = document.getElementById("productSearchBtn");
+      const outputEl = document.getElementById("productSearchOutput");
+      const loadRowEl = document.getElementById("loadExportRow");
+      const fileInputEl = document.getElementById("exportFileInputMobile");
+      const openFileBtnEl = document.getElementById("openExportBtnMobile");
+      const copyOutputBtnEl = document.getElementById("copySearchOutputBtn");
+
+      function parseCodes(raw) {
+        return Array.from(new Set(
+          raw
+            .split(/[\s,;]+/)
+            .map((v) => v.trim())
+            .filter(Boolean)
+        ));
+      }
+
+      function sortLocationKeys(keys) {
+        return keys.sort((a, b) => {
+          const ma = a.match(/^([A-Za-z]+)(\d+)$/);
+          const mb = b.match(/^([A-Za-z]+)(\d+)$/);
+          if (!ma || !mb) return a.localeCompare(b, "en", { sensitivity: "base" });
+          const la = ma[1].toLowerCase();
+          const lb = mb[1].toLowerCase();
+          if (la !== lb) return la.localeCompare(lb, "en");
+          return Number(ma[2]) - Number(mb[2]);
+        });
+      }
+
+      function findLocationsByCode(code) {
+        if (!exportData || typeof exportData !== "object") return [];
+        const locations = [];
+        for (const key of Object.keys(exportData)) {
+          const item = exportData[key];
+          if (!item || !Array.isArray(item.items)) continue;
+          const hasCode = item.items.some((entry) => entry && entry.id === code);
+          if (hasCode) locations.push(key.toLowerCase());
+        }
+        return sortLocationKeys(locations);
+      }
+
+      function extractLocationPrefix(locationKey) {
+        const match = String(locationKey || "").match(/^([A-Za-z]+)/);
+        return match ? match[1] : "";
+      }
+
+      function markerLabelPrefixes(markerLabel) {
+        if (markerLabel === "Y+X") return ["y", "x"];
+        if (markerLabel === "MNOP") return ["m", "n", "o", "p"];
+        if (markerLabel === "iHGFE") return ["i", "h", "g", "f", "e"];
+        return [String(markerLabel || "").toLowerCase()];
+      }
+
+      function applyMarkerHighlights(prefixesSet) {
+        const markers = document.querySelectorAll(".marker");
+        markers.forEach((markerEl) => {
+          markerEl.classList.remove("is-highlighted");
+          const labelEl = markerEl.querySelector("span");
+          const label = labelEl ? labelEl.textContent.trim() : "";
+          const labelPrefixes = markerLabelPrefixes(label);
+          const shouldHighlight = labelPrefixes.some((prefix) => prefixesSet.has(prefix.toLowerCase()));
+          if (shouldHighlight) {
+            markerEl.classList.add("is-highlighted");
+          }
+        });
+      }
+
+      function setOutput(text, isError) {
+        outputEl.textContent = text;
+        outputEl.classList.toggle("error", Boolean(isError));
+      }
+
+      function searchProducts() {
+        const raw = inputEl.value.trim();
+        if (!raw) {
+          setOutput("");
+          applyMarkerHighlights(new Set());
+          return;
+        }
+        if (!exportData) {
+          setOutput("Data is not loaded (export.json).", true);
+          applyMarkerHighlights(new Set());
+          return;
+        }
+
+        const codes = parseCodes(raw);
+        if (codes.length === 0) {
+          setOutput("");
+          applyMarkerHighlights(new Set());
+          return;
+        }
+
+        const matchedPrefixes = new Set();
+        const collectMatchedPrefixes = function (locations) {
+          locations.forEach((locationKey) => {
+            const prefix = extractLocationPrefix(locationKey).toLowerCase();
+            if (prefix) matchedPrefixes.add(prefix);
+          });
+        };
+
+        if (codes.length === 1) {
+          const locations = findLocationsByCode(codes[0]);
+          collectMatchedPrefixes(locations);
+          applyMarkerHighlights(matchedPrefixes);
+          setOutput(locations.length > 0 ? locations.join(",") : "not found");
+          return;
+        }
+
+        const lines = codes.map((code) => {
+          const locations = findLocationsByCode(code);
+          collectMatchedPrefixes(locations);
+          return locations.length > 0 ? code + ": " + locations.join(",") : code + ": not found";
+        });
+        applyMarkerHighlights(matchedPrefixes);
+        setOutput(lines.join("\n"));
+      }
+
+      async function loadExportFromFetch() {
+        try {
+          const response = await fetch("../export.json");
+          if (!response.ok) throw new Error("bad status");
+          exportData = await response.json();
+          return true;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      async function initExportData() {
+        const ok = await loadExportFromFetch();
+        if (!ok) {
+          loadRowEl.style.display = "flex";
+          setOutput("Automatic export.json loading failed. Use the 'Open export.json' button.", true);
+          return;
+        }
+        setOutput("");
+      }
+
+      function loadExportFromFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function () {
+          try {
+            exportData = JSON.parse(String(reader.result || "{}"));
+            setOutput("");
+          } catch (err) {
+            setOutput("The selected file is not valid JSON.", true);
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function localizeMarkerAriaLabels() {
+        const markers = document.querySelectorAll(".marker[aria-label]");
+        markers.forEach((marker) => {
+          const currentLabel = marker.getAttribute("aria-label") || "";
+          marker.setAttribute("aria-label", currentLabel.replace(/^Asukoht\s+/i, "Location "));
+        });
+      }
+
+      async function copyOutputText() {
+        const text = outputEl.textContent || "";
+        if (!text.trim()) return;
+        const originalText = copyOutputBtnEl.textContent;
+        try {
+          await navigator.clipboard.writeText(text);
+          copyOutputBtnEl.textContent = "Copied";
+        } catch (err) {
+          copyOutputBtnEl.textContent = "Copy failed";
+        }
+        setTimeout(function () {
+          copyOutputBtnEl.textContent = originalText;
+        }, 1200);
+      }
+
+      buttonEl.addEventListener("click", searchProducts);
+      inputEl.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") searchProducts();
+      });
+
+      openFileBtnEl.addEventListener("click", function () {
+        fileInputEl.click();
+      });
+      fileInputEl.addEventListener("change", function () {
+        const file = fileInputEl.files && fileInputEl.files[0];
+        loadExportFromFile(file);
+      });
+      copyOutputBtnEl.addEventListener("click", copyOutputText);
+
+      localizeMarkerAriaLabels();
+      initExportData();
+    })();
+  </script>
+</body>
+</html>

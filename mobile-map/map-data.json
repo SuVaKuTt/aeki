@@ -1,0 +1,382 @@
+﻿[
+    {
+        "id":  "floor-1",
+        "title":  "1st Floor",
+        "image":  "assets/image2.png",
+        "pixelWidth":  796,
+        "pixelHeight":  515,
+        "offX":  723900,
+        "offY":  653143,
+        "extX":  7545573,
+        "extY":  4904762,
+        "markers":  [
+                        {
+                            "label":  "AT",
+                            "xPct":  32.3893,
+                            "yPct":  13.0945,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AK",
+                            "xPct":  49.8725,
+                            "yPct":  13.2888,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AO",
+                            "xPct":  32.4909,
+                            "yPct":  18.845,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AJ",
+                            "xPct":  49.9742,
+                            "yPct":  19.0392,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AN",
+                            "xPct":  32.4419,
+                            "yPct":  24.6979,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "Ai",
+                            "xPct":  49.9251,
+                            "yPct":  24.8921,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AM",
+                            "xPct":  32.4524,
+                            "yPct":  30.5239,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AH",
+                            "xPct":  49.9357,
+                            "yPct":  30.7181,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AL",
+                            "xPct":  32.5155,
+                            "yPct":  36.3013,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AG",
+                            "xPct":  49.9988,
+                            "yPct":  36.4956,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AS",
+                            "xPct":  43.9466,
+                            "yPct":  74.0947,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AQ",
+                            "xPct":  43.8975,
+                            "yPct":  79.9476,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AP",
+                            "xPct":  43.908,
+                            "yPct":  85.7736,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        },
+                        {
+                            "label":  "AR",
+                            "xPct":  43.9711,
+                            "yPct":  91.551,
+                            "wPct":  8.5878,
+                            "hPct":  5.1379
+                        }
+                    ],
+        "annotations":  [
+                            {
+                                "text":  "Ground floor",
+                                "xPct":  56.0589,
+                                "yPct":  82.8417,
+                                "arrow":  "left"
+                            }
+                        ],
+        "cropLeftPct":  0,
+        "cropRightPct":  0,
+        "cropLeftFrac":  0,
+        "cropRightFrac":  0,
+        "visibleFrac":  1,
+        "viewPixelWidth":  796,
+        "viewPixelHeight":  515
+    },
+    {
+        "id":  "floor-2",
+        "title":  "2nd Floor",
+        "image":  "assets/image1.png",
+        "pixelWidth":  1317,
+        "pixelHeight":  1039,
+        "offX":  4438650,
+        "offY":  327025,
+        "extX":  12409507,
+        "extY":  9895238,
+        "markers":  [
+                        {
+                            "label":  "R",
+                            "xPct":  77.4784,
+                            "yPct":  23.3427,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "Q",
+                            "xPct":  83.056,
+                            "yPct":  23.3427,
+                            "wPct":  5.1386,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "T",
+                            "xPct":  80.7917,
+                            "yPct":  26.7839,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "Z",
+                            "xPct":  57.8162,
+                            "yPct":  28.5406,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "S",
+                            "xPct":  77.8878,
+                            "yPct":  30.2251,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "Y+X",
+                            "xPct":  57.49,
+                            "yPct":  31.5246,
+                            "wPct":  5.77,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AW",
+                            "xPct":  80.4271,
+                            "yPct":  33.2573,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "W",
+                            "xPct":  57.7778,
+                            "yPct":  34.3643,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AA",
+                            "xPct":  77.568,
+                            "yPct":  36.506,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AD",
+                            "xPct":  83.2543,
+                            "yPct":  36.6263,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "V",
+                            "xPct":  57.7821,
+                            "yPct":  37.2039,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AE",
+                            "xPct":  83.7596,
+                            "yPct":  39.7307,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "U",
+                            "xPct":  57.765,
+                            "yPct":  40.0676,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AX",
+                            "xPct":  57.781,
+                            "yPct":  42.9433,
+                            "wPct":  5.241,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AV",
+                            "xPct":  57.797,
+                            "yPct":  45.819,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AY",
+                            "xPct":  57.8034,
+                            "yPct":  48.7068,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AZ",
+                            "xPct":  57.8418,
+                            "yPct":  51.5705,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AU",
+                            "xPct":  77.1266,
+                            "yPct":  54.5304,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AF",
+                            "xPct":  85.589,
+                            "yPct":  54.7229,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AU",
+                            "xPct":  77.1266,
+                            "yPct":  57.8272,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AC",
+                            "xPct":  88.8191,
+                            "yPct":  57.9235,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AU",
+                            "xPct":  77.165,
+                            "yPct":  61.1,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AC",
+                            "xPct":  83.0368,
+                            "yPct":  61.1,
+                            "wPct":  5.1386,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "AB",
+                            "xPct":  88.9086,
+                            "yPct":  61.1,
+                            "wPct":  5.1898,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "MNOP",
+                            "xPct":  49.5842,
+                            "yPct":  83.175299999999993,
+                            "wPct":  7.5221,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "iHGFE",
+                            "xPct":  63.7584,
+                            "yPct":  83.175299999999993,
+                            "wPct":  8.0338,
+                            "hPct":  2.5467
+                        },
+                        {
+                            "label":  "L",
+                            "xPct":  57.5731,
+                            "yPct":  86.4,
+                            "wPct":  5.1898,
+                            "hPct":  1.8191
+                        },
+                        {
+                            "label":  "K",
+                            "xPct":  57.5774,
+                            "yPct":  88.4053,
+                            "wPct":  5.1898,
+                            "hPct":  1.8191
+                        },
+                        {
+                            "label":  "J",
+                            "xPct":  57.6115,
+                            "yPct":  90.4348,
+                            "wPct":  5.1898,
+                            "hPct":  1.8191
+                        },
+                        {
+                            "label":  "D",
+                            "xPct":  57.6222,
+                            "yPct":  92.4509,
+                            "wPct":  5.1898,
+                            "hPct":  1.8191
+                        },
+                        {
+                            "label":  "C",
+                            "xPct":  57.6435,
+                            "yPct":  94.4536,
+                            "wPct":  5.1898,
+                            "hPct":  1.8191
+                        },
+                        {
+                            "label":  "B",
+                            "xPct":  57.6499,
+                            "yPct":  96.4429,
+                            "wPct":  5.1898,
+                            "hPct":  1.8191
+                        },
+                        {
+                            "label":  "A",
+                            "xPct":  57.6883,
+                            "yPct":  98.4082,
+                            "wPct":  5.1898,
+                            "hPct":  1.8191
+                        }
+                    ],
+        "annotations":  [
+
+                        ],
+        "cropLeftPct":  33.3333,
+        "cropRightPct":  0,
+        "cropLeftFrac":  0.333333,
+        "cropRightFrac":  0,
+        "visibleFrac":  0.666667,
+        "viewPixelWidth":  878,
+        "viewPixelHeight":  1039
+    }
+]
