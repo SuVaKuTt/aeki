@@ -51,6 +51,24 @@ Marker sisaldab:
 - `index.html` on visuaalne referents (stiil + crop + overlay loogika)
 - `map-data.json` on integratsiooni jaoks olulisem kui `index.html`
 
+## Praegune `index.html` funktsionaalsus
+
+- UI tekstid on ingliskeelsed
+- all on tootekoodi otsing (`Search`)
+  - toetab üht koodi või mitut koodi (komaga eraldatud)
+  - ühe koodi väljund: `AX,A,X`
+  - mitme koodi väljund: üks rida per kood (`805.481.85: AX,A,X`)
+- tulemuse saab kopeerida plain textina (`Copy`)
+- leitud markerid värvitakse kaardil tumepunaseks
+  - sisaldab erijuhte: `Y+X`, `MNOP`, `iHGFE`
+- kui `export.json` automaatlaadimine ebaõnnestub, saab faili käsitsi avada (`Open export.json`)
+- lehe lõpus on tagasilink avalehele (`Return`)
+
+## Andmeallikad otsingus
+
+- markerite render: `map-data.json`
+- tootekoodi otsing: `../export.json`
+
 ## Kui tahad hiljem muuta andmeid
 
 Ajalooline generaator on:

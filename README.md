@@ -9,6 +9,8 @@ Simple web application for viewing and searching categorized export data.
 - **index2.html** - StockFinder by Area - shows items grouped by area with sidebar navigation
 - **export.json** - JSON data file containing categorized items with IDs and quantities
 - **coordinates.json** - JSON file containing area coordinates for map visualization
+- **mobile-map/index.html** - Mobile detail map view (linked from homepage title as `detail map`)
+- **mobile-map/map-data.json** - Marker positions for the mobile detail map
 
 ## Usage
 
@@ -131,6 +133,20 @@ Interactive map view that displays areas as rectangular boxes on a floor plan im
      - Header shows selected colorDesc: "Area Info, Lighting"
      - Filters keys to show only those with matching colorDesc value
      - Example: If "Storage" is selected, only shows keys where colorDesc = "Storage"
+
+## Mobile Detail Map (`mobile-map/index.html`)
+
+This project now includes a dedicated mobile detail map page.
+
+- Open from homepage title link: `detail map`
+- Shows 1st and 2nd floor maps with marker overlays from `mobile-map/map-data.json`
+- Includes product code search using `export.json` data
+  - Single code output: `AX,A,X`
+  - Multiple codes output: one line per code (`805.481.85: AX,A,X`)
+- Search results can be copied as plain text (`Copy` button)
+- Matching map markers are highlighted in dark red
+- Fallback for local mode: if auto-load fails, use `Open export.json`
+- Page includes a `Return` link back to homepage
 
 **Coordinate System:**
 - Coordinates are stored in `coordinates.json` with both absolute (px) and relative (%) values

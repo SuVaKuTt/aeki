@@ -153,6 +153,19 @@
       flex-wrap: wrap;
     }
 
+    .page-back-link {
+      display: inline-block;
+      margin-top: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .page-back-link:hover {
+      text-decoration: underline;
+      color: var(--accent-2);
+    }
+
     .map-stage {
       position: relative;
       width: 100%;
@@ -448,7 +461,7 @@
           <input id="productSearchInput" class="search-input" type="text" inputmode="decimal" enterkeyhint="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="e.g. 805.481.85 or 805.481.85, 205.103.93" />
           <button id="productSearchBtn" class="search-button" type="button">Search</button>
         </div>
-        <p class="search-help">For multiple codes, separate with commas. Output: code: a1,ab12</p>
+        <p class="search-help">For multiple codes, separate with commas. Output: code: A1,AB12</p>
         <div id="productSearchOutput" class="search-output"></div>
         <div class="search-actions">
           <button id="copySearchOutputBtn" class="search-button" type="button">Copy</button>
@@ -459,6 +472,7 @@
           <span class="search-help">Use this if automatic loading fails.</span>
         </div>
       </section>
+      <a class="page-back-link" href="../index.html">Return</a>
 
   </main>
   <script>
@@ -500,7 +514,7 @@
           const item = exportData[key];
           if (!item || !Array.isArray(item.items)) continue;
           const hasCode = item.items.some((entry) => entry && entry.id === code);
-          if (hasCode) locations.push(key.toLowerCase());
+          if (hasCode) locations.push(key.toUpperCase());
         }
         return sortLocationKeys(locations);
       }
