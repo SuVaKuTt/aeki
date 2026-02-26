@@ -32,6 +32,49 @@
       padding: 14px 12px 28px;
     }
 
+    .page-header {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .page-tabs {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #2d2d2d;
+      box-shadow: var(--shadow);
+    }
+
+    .page-tab {
+      padding: 9px 12px;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 650;
+      font-size: 13px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .page-tab + .page-tab {
+      border-left: 1px solid var(--line);
+    }
+
+    .page-tab:hover {
+      background: #3b3b3b;
+    }
+
+    .page-tab.active {
+      background: #3d3d3d;
+      color: #ffffff;
+      cursor: default;
+    }
+
+    .page-tab.active:hover {
+      background: #3d3d3d;
+    }
+
     .floor-card {
       background: var(--card);
       border: 1px solid var(--line);
@@ -246,7 +289,7 @@
 
     .map-callout-text {
       background: var(--marker-bg);
-      color: #e7eef3;
+      color: #101214;
       border: 1px solid rgba(255, 255, 255, 0.45);
       border-radius: 999px;
       padding: 3px 8px;
@@ -259,7 +302,7 @@
 
     .map-callout-arrow {
       background: var(--marker-bg);
-      color: #e7eef3;
+      color: #101214;
       border: 1px solid rgba(255, 255, 255, 0.45);
       border-radius: 999px;
       padding: 2px 5px 3px;
@@ -279,6 +322,12 @@
 </head>
 <body>
   <main class="page">
+      <header class="page-header" aria-label="Page navigation">
+        <nav class="page-tabs" aria-label="Pages">
+          <a class="page-tab" href="../index.html">StockFinder</a>
+          <a class="page-tab active" href="index.html" aria-current="page">Detail map</a>
+        </nav>
+      </header>
       <section class="floor-card" id="floor-1">
         <header class="floor-header">
           <h2>1st Floor</h2>
@@ -579,10 +628,11 @@
         };
 
         if (codes.length === 1) {
-          const locations = findLocationsByCode(codes[0]);
+          const code = codes[0];
+          const locations = findLocationsByCode(code);
           collectMatchedPrefixes(locations);
           applyMarkerHighlights(matchedPrefixes);
-          setOutput(locations.length > 0 ? locations.join(",") : "not found");
+          setOutput(locations.length > 0 ? code + ": " + locations.join(",") : code + ": not found");
           return;
         }
 

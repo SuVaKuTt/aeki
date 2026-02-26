@@ -28,6 +28,50 @@
             font-size: 1.2em; /* Väiksem kui vaikimisi h1 suurus */
         }
 
+        .page-header {
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 20px 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .page-tabs {
+            display: inline-flex;
+            border: 1px solid #505050;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #2d2d2d;
+        }
+
+        .page-tab {
+            padding: 10px 14px;
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 650;
+            font-size: 14px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .page-tab + .page-tab {
+            border-left: 1px solid #505050;
+        }
+
+        .page-tab:hover {
+            background: #3b3b3b;
+        }
+
+        .page-tab.active {
+            background: #3d3d3d;
+            color: #ffffff;
+            cursor: default;
+        }
+
+        .page-tab.active:hover {
+            background: #3d3d3d;
+        }
+
         .title-detail-link {
             color: #4a9eff;
             font-size: 0.85em;
@@ -726,12 +770,20 @@
     <div id="helpModal" class="help-modal" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
         <div class="help-modal-card">
             <h2 id="helpModalTitle">Quick Guide</h2>
-            <p>Use this page for overview and location checks in the warehouse.</p>
+            <p><strong>Tip:</strong> enter codes exactly as printed (keep dots/letters/numbers).</p>
+
+            <h3>This page: StockFinder (overview)</h3>
             <ul>
-                <li>Use area and category filters (for example: <strong>Storage</strong>, <strong>Lighting</strong>) to see zones.</li>
-                <li>Search by product code (for example: <code>805.481.85</code>) to find where the item is located.</li>
-                <li>Search by pallet key (for example: <code>AX3</code>) to see what items are on that pallet.</li>
-                <li>Open <strong>detail map</strong> for fast mobile code lookup and copy-ready results.</li>
+                <li>The map shows <strong>areas</strong>. Each area contains multiple <strong>pallets</strong> (for example: <code>A1</code>–<code>A10</code>).</li>
+                <li><strong>Find a product:</strong> search by product code (for example: <code>805.481.85</code>) to highlight the area(s) where it is located.</li>
+                <li><strong>Check a pallet:</strong> search by pallet key (for example: <code>AX3</code>) to see what items are on that pallet.</li>
+                <li><strong>Filter by category:</strong> select a category (for example: <strong>Storage</strong>, <strong>Lighting</strong>) to highlight matching areas.</li>
+            </ul>
+
+            <h3>Detail map (mobile / fast lookup)</h3>
+            <ul>
+                <li>Search one or multiple product codes.</li>
+                <li>See highlighted markers and copy-ready results.</li>
             </ul>
             <div class="help-modal-actions">
                 <a class="help-modal-btn" href="mobile-map/index.html">Open detail map</a>
@@ -739,7 +791,12 @@
             </div>
         </div>
     </div>
-    <h1>StockFinder <a class="title-detail-link" href="mobile-map/index.html">detail map</a></h1>
+    <header class="page-header" aria-label="Page navigation">
+        <nav class="page-tabs" aria-label="Pages">
+            <a class="page-tab active" href="index.html" aria-current="page">StockFinder</a>
+            <a class="page-tab" href="mobile-map/index.html">Detail map</a>
+        </nav>
+    </header>
     <div class="main-container">
         <div class="sidebar" id="sidebar">
             <div class="file-container">
