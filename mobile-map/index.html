@@ -196,17 +196,28 @@
       flex-wrap: wrap;
     }
 
+    .page-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
     .page-back-link {
       display: inline-block;
-      margin-top: 12px;
       color: var(--accent);
       text-decoration: none;
-      font-size: 13px;
     }
 
     .page-back-link:hover {
       text-decoration: underline;
       color: var(--accent-2);
+    }
+
+    .page-last-updated {
+      color: var(--muted);
+      white-space: nowrap;
     }
 
     .map-stage {
@@ -521,7 +532,10 @@
           <span class="search-help">Use this if automatic loading fails.</span>
         </div>
       </section>
-      <a class="page-back-link" href="../index.html">Return</a>
+      <div class="page-footer-row">
+        <a class="page-back-link" href="../index.html">Return</a>
+        <span id="mobileLastUpdated" class="page-last-updated"></span>
+      </div>
 
   </main>
   <script>
@@ -534,6 +548,16 @@
       const fileInputEl = document.getElementById("exportFileInputMobile");
       const openFileBtnEl = document.getElementById("openExportBtnMobile");
       const copyOutputBtnEl = document.getElementById("copySearchOutputBtn");
+      const lastUpdatedEl = document.getElementById("mobileLastUpdated");
+
+      if (lastUpdatedEl) {
+        const d = new Date(document.lastModified);
+        lastUpdatedEl.textContent = d.toLocaleDateString("et-EE", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        });
+      }
 
       function parseCodes(raw) {
         return Array.from(new Set(
@@ -722,6 +746,13 @@
 
       (async function notifyPageOpen() {
         try {
+          const host = window.location.hostname;
+          const isLocal =
+            host === "localhost" ||
+            host === "127.0.0.1" ||
+            window.location.protocol !== "https:";
+          if (isLocal) return;
+
           const ts = encodeURIComponent(new Date().toISOString());
           const path = encodeURIComponent(location.pathname);
           await fetch("https://auto.vaiste.ee/webhook/github-aeki?ts=" + ts + "&path=" + path, {

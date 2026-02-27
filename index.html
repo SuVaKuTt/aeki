@@ -94,18 +94,23 @@
             justify-content: space-between;
             align-items: center;
             gap: 12px;
+            font-size: 0.9em;
         }
 
         .top-links a {
             color: #4a9eff;
             text-decoration: none;
-            font-size: 0.9em;
             white-space: nowrap;
         }
 
         .top-links a:hover {
             color: #7ab8ff;
             text-decoration: underline;
+        }
+
+        .top-links-date {
+            color: #b0b0b0;
+            white-space: nowrap;
         }
 
         .help-fab {
@@ -2957,9 +2962,21 @@
                 }
             });
         }
+
+        window.addEventListener('load', function () {
+            const span = document.getElementById('lastUpdated');
+            if (!span) return;
+            const d = new Date(document.lastModified);
+            span.textContent = d.toLocaleDateString('et-EE', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        });
     </script>
     <div class="top-links">
         <a href="https://docs.google.com/spreadsheets/d/1crM63Wx_jaSfaRT_M96ARXVPN92WeZEI/edit?usp=drive_link&amp;ouid=118186260651226579492&amp;rtpof=true&amp;sd=true" target="_blank" rel="noopener noreferrer">Open Excel</a>
+        <span id="lastUpdated" class="top-links-date"></span>
         <a href="export.json" download>Download json</a>
     </div>
 </body>
