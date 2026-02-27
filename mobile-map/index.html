@@ -584,6 +584,12 @@
         });
       }
 
+      function locationKeyForDisplay(key) {
+        const u = String(key || "").toUpperCase();
+        if (u.charAt(0) === "I") return "i" + u.slice(1);
+        return u;
+      }
+
       function findLocationsByCode(code) {
         if (!exportData || typeof exportData !== "object") return [];
         const locations = [];
@@ -591,7 +597,7 @@
           const item = exportData[key];
           if (!item || !Array.isArray(item.items)) continue;
           const hasCode = item.items.some((entry) => entry && entry.id === code);
-          if (hasCode) locations.push(key.toUpperCase());
+          if (hasCode) locations.push(locationKeyForDisplay(key));
         }
         return sortLocationKeys(locations);
       }
