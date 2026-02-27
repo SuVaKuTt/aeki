@@ -182,6 +182,10 @@
       color: #ff9b9b;
     }
 
+    .search-location {
+      color: #FFD700;
+    }
+
     .search-actions {
       margin-top: 8px;
       display: flex;
@@ -619,8 +623,49 @@
       }
 
       function setOutput(text, isError) {
-        outputEl.textContent = text;
         outputEl.classList.toggle("error", Boolean(isError));
+
+        if (isError) {
+          outputEl.textContent = text;
+          return;
+        }
+
+        if (!text) {
+          outputEl.textContent = "";
+          return;
+        }
+
+        const escapeHtml = function (str) {
+          return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        };
+
+        const html = text.split("\n").map(function (line) {
+          const sepIndex = line.indexOf(": ");
+          if (sepIndex === -1) return escapeHtml(line);
+
+          const codePart = line.slice(0, sepIndex);
+          const rest = line.slice(sepIndex + 2);
+
+          if (rest.trim() === "not found") {
+            return escapeHtml(line);
+          }
+
+          const highlighted = rest
+            .split(",")
+            .map(function (loc) {
+              return '<span class="search-location">' + escapeHtml(loc) + "</span>";
+            })
+            .join(",");
+
+          return escapeHtml(codePart) + ": " + highlighted;
+        }).join("\n");
+
+        outputEl.innerHTML = html;
       }
 
       function searchProducts() {
