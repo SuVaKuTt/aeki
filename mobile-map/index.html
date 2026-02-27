@@ -719,6 +719,19 @@
 
       localizeMarkerAriaLabels();
       initExportData();
+
+      (async function notifyPageOpen() {
+        try {
+          const ts = encodeURIComponent(new Date().toISOString());
+          const path = encodeURIComponent(location.pathname);
+          await fetch("https://auto.vaiste.ee/webhook/github-aeki?ts=" + ts + "&path=" + path, {
+            method: "GET",
+            mode: "no-cors"
+          });
+        } catch (err) {
+          // teadlikult ignoreerime vea, et kasutajat mitte segada
+        }
+      })();
     })();
   </script>
 </body>
